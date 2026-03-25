@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import TabBar from './components/TabBar.vue'
 
 const router = useRouter()
+const route = useRoute()
 const currentTab = ref('places')
 
 const tabs = [
@@ -14,17 +15,19 @@ const tabs = [
   { key: 'mypage', label: 'MY', icon: '👤', route: '/mypage' },
 ]
 
+function syncTab() {
+  const path = route.path
+  const found = tabs.find(t => path.startsWith(t.route))
+  if (found) currentTab.value = found.key
+}
+
 function onTabChange(tab: string) {
   currentTab.value = tab
   const found = tabs.find(t => t.key === tab)
   if (found) router.push(found.route)
 }
 
-onMounted(() => {
-  const path = router.currentRoute.value.path
-  const found = tabs.find(t => t.route === path)
-  if (found) currentTab.value = found.key
-})
+watch(() => route.path, syncTab, { immediate: true })
 </script>
 
 <template>

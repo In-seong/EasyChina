@@ -14,7 +14,7 @@ export default defineConfig({
   build: {
     outDir: 'dist/user',
     rollupOptions: {
-      input: path.resolve(__dirname, 'user.html'),
+      input: path.resolve(__dirname, 'index.html'),
     },
   },
   server: {

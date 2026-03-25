@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             InitialDataSeeder::class,
             PhraseSeeder::class,
+            PlaceSeeder::class,
+            TipSeeder::class,
         ]);
     }
 }

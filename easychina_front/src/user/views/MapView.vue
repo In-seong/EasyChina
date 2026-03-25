@@ -46,20 +46,24 @@ function createMarkerIcon(color: string, label: string) {
 }
 
 async function fetchFilters() {
-  const [cityRes, catRes] = await Promise.all([
-    api.get<ApiResponse<City[]>>('/api/user/cities'),
-    api.get<ApiResponse<Category[]>>('/api/user/categories'),
-  ])
-  cities.value = cityRes.data.data
-  categories.value = catRes.data.data
+  try {
+    const [cityRes, catRes] = await Promise.all([
+      api.get<ApiResponse<City[]>>('/api/user/cities'),
+      api.get<ApiResponse<Category[]>>('/api/user/categories'),
+    ])
+    cities.value = cityRes.data.data
+    categories.value = catRes.data.data
 
-  // 기본: 상하이
-  const shanghai = cities.value.find(c => c.name_ko === '상하이')
-  if (shanghai) {
-    selectedCity.value = shanghai.id
-    if (map) {
-      map.setView([Number(shanghai.latitude), Number(shanghai.longitude)], 13)
+    // 기본: 상하이
+    const shanghai = cities.value.find(c => c.name_ko === '상하이')
+    if (shanghai) {
+      selectedCity.value = shanghai.id
+      if (map) {
+        map.setView([Number(shanghai.latitude), Number(shanghai.longitude)], 13)
+      }
     }
+  } catch (e) {
+    console.error('Failed to fetch filters:', e)
   }
 }
 
@@ -76,6 +80,8 @@ async function fetchPlaces() {
     })
     places.value = data.data.data
     renderMarkers()
+  } catch (e) {
+    console.error('Failed to fetch places:', e)
   } finally {
     loading.value = false
   }
@@ -104,6 +110,11 @@ function renderMarkers() {
   })
 }
 
+let myLocationMarker: L.Marker | null = null
+let myLocationCircle: L.Circle | null = null
+let watchId: number | null = null
+const isTracking = ref(false)
+
 function initMap() {
   if (!mapContainer.value) return
 
@@ -123,6 +134,95 @@ function initMap() {
   L.control.zoom({ position: 'bottomright' }).addTo(map)
 
   markersLayer.addTo(map)
+}
+
+function toggleMyLocation() {
+  if (isTracking.value) {
+    stopTracking()
+    return
+  }
+
+  if (!navigator.geolocation) {
+    alert('이 브라우저에서는 위치 추적을 지원하지 않습니다.')
+    return
+  }
+
+  isTracking.value = true
+
+  // 현재 위치 1회 가져오기
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      updateMyLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy)
+      if (map) map.setView([pos.coords.latitude, pos.coords.longitude], 15)
+    },
+    (err) => {
+      console.error('위치 오류:', err)
+      alert('위치를 가져올 수 없습니다. 위치 권한을 허용해주세요.')
+      isTracking.value = false
+    },
+    { enableHighAccuracy: true }
+  )
+
+  // 실시간 추적
+  watchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      updateMyLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy)
+    },
+    () => {},
+    { enableHighAccuracy: true, maximumAge: 5000 }
+  )
+}
+
+function updateMyLocation(lat: number, lng: number, accuracy: number) {
+  if (!map) return
+
+  if (myLocationMarker) {
+    myLocationMarker.setLatLng([lat, lng])
+    myLocationCircle?.setLatLng([lat, lng])
+    myLocationCircle?.setRadius(accuracy)
+  } else {
+    // 파란 점 마커
+    myLocationMarker = L.marker([lat, lng], {
+      icon: L.divIcon({
+        className: 'my-location-marker',
+        html: `<div style="
+          width: 16px; height: 16px;
+          background: #4285F4;
+          border: 3px solid white;
+          border-radius: 50%;
+          box-shadow: 0 0 8px rgba(66,133,244,0.5);
+        "></div>`,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
+      }),
+      zIndexOffset: 1000,
+    }).addTo(map)
+
+    // 정확도 원
+    myLocationCircle = L.circle([lat, lng], {
+      radius: accuracy,
+      color: '#4285F4',
+      fillColor: '#4285F4',
+      fillOpacity: 0.1,
+      weight: 1,
+    }).addTo(map)
+  }
+}
+
+function stopTracking() {
+  isTracking.value = false
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId)
+    watchId = null
+  }
+  if (myLocationMarker && map) {
+    map.removeLayer(myLocationMarker)
+    myLocationMarker = null
+  }
+  if (myLocationCircle && map) {
+    map.removeLayer(myLocationCircle)
+    myLocationCircle = null
+  }
 }
 
 function selectCategory(id: number | null) {
@@ -170,6 +270,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  stopTracking()
   if (map) {
     map.remove()
     map = null
@@ -230,6 +331,15 @@ onUnmounted(() => {
     <div v-if="loading" class="absolute top-28 left-1/2 -translate-x-1/2 z-[1000]">
       <span class="bg-white shadow-lg rounded-full px-4 py-2 text-xs text-gray-500">불러오는 중...</span>
     </div>
+
+    <!-- My Location Button -->
+    <button
+      @click="toggleMyLocation"
+      class="absolute bottom-16 right-3 z-[1000] w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center active:bg-gray-100"
+      :class="isTracking ? 'ring-2 ring-blue-400' : ''"
+    >
+      <span class="text-lg">{{ isTracking ? '📍' : '🎯' }}</span>
+    </button>
 
     <!-- Place count -->
     <div class="absolute bottom-4 left-3 z-[1000]">
