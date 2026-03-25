@@ -1,0 +1,446 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0B0134BA835C4FE8ACAEE25D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE6FA0B222B967B7B5011522 /* ContentView.swift */; };
+		13C6247748B665D3B2262098 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15E99975DD129A69ACFC6B0 /* WebView.swift */; };
+		50D4D196E63E33FCC5D1081F /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E3F86C060D0075F934C0BC /* MainView.swift */; };
+		51074615F34303E15E9603E9 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE6FA0B222B967B7B5011522 /* ContentView.swift */; };
+		5ACF21ED60F97C069FE20206 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15E99975DD129A69ACFC6B0 /* WebView.swift */; };
+		5FFFAA1FE46C3DF1156BA683 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF6858B83E70295435018F /* AppDelegate.swift */; };
+		6EB78094160AD9FA6D396701 /* EasyChinaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE9AF6C5006AD5B8B2B33915 /* EasyChinaApp.swift */; };
+		A76F8F39AB476AA13C41493C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF6858B83E70295435018F /* AppDelegate.swift */; };
+		B8A6D6DB42F01F52D5C441D2 /* EasyChinaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE9AF6C5006AD5B8B2B33915 /* EasyChinaApp.swift */; };
+		BF6E710EDB44BAFAACFBA980 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E3F86C060D0075F934C0BC /* MainView.swift */; };
+		C3AC1717C51BC0247E81FD72 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1328A0183BB03B25B337FFDF /* Assets.xcassets */; };
+		F300FFB6CD3C0531699A3590 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1328A0183BB03B25B337FFDF /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		091CC8C43E93C7FD15275C13 /* EasyChina-User.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; name = "EasyChina-User.app"; path = EasyChina.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1328A0183BB03B25B337FFDF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		20B3A6B859C05E3BE22ACC76 /* Info-Admin.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Info-Admin.plist"; sourceTree = "<group>"; };
+		4BAF6858B83E70295435018F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A3BD30539C0D54D05776B087 /* Info-User.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Info-User.plist"; sourceTree = "<group>"; };
+		B6E3F86C060D0075F934C0BC /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		BCF8E4DCFBF2571853FC874F /* EasyChina Admin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EasyChina Admin.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E15E99975DD129A69ACFC6B0 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
+		FE6FA0B222B967B7B5011522 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		FE9AF6C5006AD5B8B2B33915 /* EasyChinaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasyChinaApp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0F9D90C51C7CB36064F46988 /* EasyChina */ = {
+			isa = PBXGroup;
+			children = (
+				4BAF6858B83E70295435018F /* AppDelegate.swift */,
+				1328A0183BB03B25B337FFDF /* Assets.xcassets */,
+				FE6FA0B222B967B7B5011522 /* ContentView.swift */,
+				FE9AF6C5006AD5B8B2B33915 /* EasyChinaApp.swift */,
+				414977DC5B4035A380B6A232 /* plist */,
+				4346870CB2EEC717D5C6DD9C /* Utils */,
+				B6B15E89EAECACFEFEBCC362 /* Views */,
+			);
+			path = EasyChina;
+			sourceTree = "<group>";
+		};
+		399D898F27BC0F07699C6929 = {
+			isa = PBXGroup;
+			children = (
+				0F9D90C51C7CB36064F46988 /* EasyChina */,
+				6DAF815B6D59E83F1B2C5254 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		414977DC5B4035A380B6A232 /* plist */ = {
+			isa = PBXGroup;
+			children = (
+				20B3A6B859C05E3BE22ACC76 /* Info-Admin.plist */,
+				A3BD30539C0D54D05776B087 /* Info-User.plist */,
+			);
+			path = plist;
+			sourceTree = "<group>";
+		};
+		4346870CB2EEC717D5C6DD9C /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				E15E99975DD129A69ACFC6B0 /* WebView.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		6DAF815B6D59E83F1B2C5254 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BCF8E4DCFBF2571853FC874F /* EasyChina Admin.app */,
+				091CC8C43E93C7FD15275C13 /* EasyChina-User.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B6B15E89EAECACFEFEBCC362 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B6E3F86C060D0075F934C0BC /* MainView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9E59A84A2564E5FBA60177E5 /* EasyChina-Admin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0DF3211C330F0433C0E93672 /* Build configuration list for PBXNativeTarget "EasyChina-Admin" */;
+			buildPhases = (
+				E9F2B9520BE78C7CEB151C46 /* Sources */,
+				CBB07C34A288F4B74C485F20 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "EasyChina-Admin";
+			packageProductDependencies = (
+			);
+			productName = "EasyChina-Admin";
+			productReference = BCF8E4DCFBF2571853FC874F /* EasyChina Admin.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C23CB7ED39FAE9CD5D96D311 /* EasyChina-User */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B86AF126E530616BE6FBA71E /* Build configuration list for PBXNativeTarget "EasyChina-User" */;
+			buildPhases = (
+				A79944E7C22A2480D4EA3328 /* Sources */,
+				2D49022A89C0CAF6CF514269 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "EasyChina-User";
+			packageProductDependencies = (
+			);
+			productName = "EasyChina-User";
+			productReference = 091CC8C43E93C7FD15275C13 /* EasyChina-User.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C1EE991367047BFCE4B30A8D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					C23CB7ED39FAE9CD5D96D311 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 3551A4529907857DC28D8643 /* Build configuration list for PBXProject "EasyChina" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 399D898F27BC0F07699C6929;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 6DAF815B6D59E83F1B2C5254 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9E59A84A2564E5FBA60177E5 /* EasyChina-Admin */,
+				C23CB7ED39FAE9CD5D96D311 /* EasyChina-User */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2D49022A89C0CAF6CF514269 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F300FFB6CD3C0531699A3590 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CBB07C34A288F4B74C485F20 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C3AC1717C51BC0247E81FD72 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A79944E7C22A2480D4EA3328 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A76F8F39AB476AA13C41493C /* AppDelegate.swift in Sources */,
+				51074615F34303E15E9603E9 /* ContentView.swift in Sources */,
+				B8A6D6DB42F01F52D5C441D2 /* EasyChinaApp.swift in Sources */,
+				50D4D196E63E33FCC5D1081F /* MainView.swift in Sources */,
+				13C6247748B665D3B2262098 /* WebView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E9F2B9520BE78C7CEB151C46 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5FFFAA1FE46C3DF1156BA683 /* AppDelegate.swift in Sources */,
+				0B0134BA835C4FE8ACAEE25D /* ContentView.swift in Sources */,
+				6EB78094160AD9FA6D396701 /* EasyChinaApp.swift in Sources */,
+				BF6E710EDB44BAFAACFBA980 /* MainView.swift in Sources */,
+				5ACF21ED60F97C069FE20206 /* WebView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		204B32D4EA79187776CE3831 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 92L3HRKJ3R;
+				INFOPLIST_FILE = "EasyChina/plist/Info-Admin.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.easychina.app.admin;
+				PRODUCT_NAME = "EasyChina Admin";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = ADMIN;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9841CF5CB5B69E0AEEE626F7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		A961A2D21414955248BC9272 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 92L3HRKJ3R;
+				INFOPLIST_FILE = "EasyChina/plist/Info-Admin.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.easychina.app.admin;
+				PRODUCT_NAME = "EasyChina Admin";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = ADMIN;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B22DF1F576332F8A0DA28BFF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "EasyChina/plist/Info-User.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.easychina.app.user;
+				PRODUCT_NAME = EasyChina;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = USER;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C80E5CDAF0AD50FDCB7ADC7C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		FD497C882E5932C0920F775C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "EasyChina/plist/Info-User.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.easychina.app.user;
+				PRODUCT_NAME = EasyChina;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = USER;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0DF3211C330F0433C0E93672 /* Build configuration list for PBXNativeTarget "EasyChina-Admin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				204B32D4EA79187776CE3831 /* Debug */,
+				A961A2D21414955248BC9272 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3551A4529907857DC28D8643 /* Build configuration list for PBXProject "EasyChina" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9841CF5CB5B69E0AEEE626F7 /* Debug */,
+				C80E5CDAF0AD50FDCB7ADC7C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B86AF126E530616BE6FBA71E /* Build configuration list for PBXNativeTarget "EasyChina-User" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B22DF1F576332F8A0DA28BFF /* Debug */,
+				FD497C882E5932C0920F775C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C1EE991367047BFCE4B30A8D /* Project object */;
+}

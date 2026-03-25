@@ -1,0 +1,48 @@
+name: EasyChina
+options:
+  bundleIdPrefix: com.easychina.app
+  deploymentTarget:
+    iOS: "15.0"
+  xcodeVersion: "16.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: 1
+    DEVELOPMENT_TEAM: ""
+
+targets:
+  EasyChina-User:
+    type: application
+    platform: iOS
+    sources:
+      - path: EasyChina
+        excludes:
+          - plist/Info-Admin.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.easychina.app.user
+        INFOPLIST_FILE: EasyChina/plist/Info-User.plist
+        PRODUCT_NAME: EasyChina
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: USER
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    scheme:
+      testTargets: []
+
+  EasyChina-Admin:
+    type: application
+    platform: iOS
+    sources:
+      - path: EasyChina
+        excludes:
+          - plist/Info-User.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.easychina.app.admin
+        INFOPLIST_FILE: EasyChina/plist/Info-Admin.plist
+        PRODUCT_NAME: EasyChina Admin
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: ADMIN
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    scheme:
+      testTargets: []
