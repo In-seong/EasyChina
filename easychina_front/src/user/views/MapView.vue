@@ -20,6 +20,22 @@ const selectedCategory = ref<number | null>(null)
 const searchQuery = ref('')
 const selectedPlace = ref<Place | null>(null)
 const loading = ref(false)
+const searchResults = ref<SearchResult[]>([])
+const showSearchResults = ref(false)
+const searching = ref(false)
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+
+interface SearchResult {
+  type: 'db' | 'nominatim'
+  name: string
+  nameKo?: string
+  nameCn?: string
+  lat: number
+  lng: number
+  address?: string
+  placeId?: number
+  category?: string
+}
 
 // 카테고리 색상 → Leaflet 마커 아이콘
 function createMarkerIcon(color: string, label: string) {
@@ -225,6 +241,109 @@ function stopTracking() {
   }
 }
 
+// 검색 (디바운스)
+function onSearchInput() {
+  if (searchTimer) clearTimeout(searchTimer)
+  const q = searchQuery.value.trim()
+  if (!q) {
+    searchResults.value = []
+    showSearchResults.value = false
+    return
+  }
+  searchTimer = setTimeout(() => doSearch(q), 300)
+}
+
+async function doSearch(q: string) {
+  searching.value = true
+  showSearchResults.value = true
+  searchResults.value = []
+
+  try {
+    // DB 검색 + Nominatim 병렬
+    const [dbRes, nominatimRes] = await Promise.allSettled([
+      api.get<ApiResponse<PaginatedResponse<Place>>>('/api/user/places', {
+        params: { search: q, per_page: 5 },
+      }),
+      fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&accept-language=ko,zh&countrycodes=cn&addressdetails=1`, {
+        headers: { 'User-Agent': 'EasyChina/1.0' },
+      }).then(r => r.json()),
+    ])
+
+    const results: SearchResult[] = []
+
+    // DB 결과
+    if (dbRes.status === 'fulfilled') {
+      const dbPlaces = dbRes.value.data.data.data
+      dbPlaces.forEach((p: Place) => {
+        results.push({
+          type: 'db',
+          name: p.name_ko,
+          nameKo: p.name_ko,
+          nameCn: p.name_cn,
+          lat: Number(p.latitude),
+          lng: Number(p.longitude),
+          placeId: p.id,
+          category: p.category?.name_ko,
+        })
+      })
+    }
+
+    // Nominatim 결과
+    if (nominatimRes.status === 'fulfilled') {
+      const nomResults = nominatimRes.value as any[]
+      nomResults.forEach((r: any) => {
+        // DB 결과와 중복 제거 (근접 좌표)
+        const isDuplicate = results.some(
+          existing => Math.abs(existing.lat - parseFloat(r.lat)) < 0.001
+                   && Math.abs(existing.lng - parseFloat(r.lon)) < 0.001
+        )
+        if (!isDuplicate) {
+          results.push({
+            type: 'nominatim',
+            name: r.display_name?.split(',')[0] || r.name,
+            lat: parseFloat(r.lat),
+            lng: parseFloat(r.lon),
+            address: r.display_name,
+          })
+        }
+      })
+    }
+
+    searchResults.value = results
+  } catch (e) {
+    console.error('Search error:', e)
+  } finally {
+    searching.value = false
+  }
+}
+
+function selectSearchResult(result: SearchResult) {
+  showSearchResults.value = false
+  searchQuery.value = result.name
+
+  if (map) {
+    map.setView([result.lat, result.lng], 16)
+  }
+
+  // 검색 결과 마커 표시
+  const color = result.type === 'db' ? '#3b82f6' : '#ef4444'
+  const icon = createMarkerIcon(color, result.name)
+  const marker = L.marker([result.lat, result.lng], { icon })
+
+  if (result.type === 'db' && result.placeId) {
+    marker.on('click', () => {
+      const dbPlace = places.value.find(p => p.id === result.placeId)
+      if (dbPlace) selectedPlace.value = dbPlace
+    })
+  }
+
+  markersLayer.addLayer(marker)
+}
+
+function closeSearchResults() {
+  showSearchResults.value = false
+}
+
 function selectCategory(id: number | null) {
   selectedCategory.value = selectedCategory.value === id ? null : id
   fetchPlaces()
@@ -285,16 +404,50 @@ onUnmounted(() => {
       <div class="flex-1 relative">
         <input
           v-model="searchQuery"
+          @input="onSearchInput"
           @keyup.enter="fetchPlaces()"
+          @focus="searchQuery.trim() && searchResults.length && (showSearchResults = true)"
           type="text"
-          placeholder="장소 검색 (한국어/중국어)"
+          placeholder="장소, 주소 검색 (한국어/중국어/영어)"
           class="w-full bg-white shadow-lg rounded-xl px-4 py-2.5 text-sm pl-9 border-0 outline-none"
         />
         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+        <button
+          v-if="searchQuery"
+          @click="searchQuery = ''; searchResults = []; showSearchResults = false; fetchPlaces()"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
+        >✕</button>
+
+        <!-- Search Results Dropdown -->
+        <div
+          v-if="showSearchResults"
+          class="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg max-h-72 overflow-y-auto"
+        >
+          <div v-if="searching" class="p-4 text-center text-xs text-gray-400">검색 중...</div>
+          <div v-else-if="searchResults.length === 0" class="p-4 text-center text-xs text-gray-400">결과 없음</div>
+          <template v-else>
+            <button
+              v-for="(result, idx) in searchResults"
+              :key="idx"
+              @click="selectSearchResult(result)"
+              class="w-full text-left px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 active:bg-gray-100"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-1.5 py-0.5 rounded-full shrink-0"
+                      :class="result.type === 'db' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'">
+                  {{ result.type === 'db' ? (result.category || '등록') : '지도' }}
+                </span>
+                <span class="text-sm font-medium text-gray-800 truncate">{{ result.name }}</span>
+              </div>
+              <p v-if="result.nameCn" class="text-xs text-gray-400 mt-0.5 ml-12">{{ result.nameCn }}</p>
+              <p v-else-if="result.address" class="text-xs text-gray-400 mt-0.5 ml-12 truncate">{{ result.address }}</p>
+            </button>
+          </template>
+        </div>
       </div>
       <select
         v-model="selectedCity"
-        class="bg-white shadow-lg rounded-xl px-3 py-2.5 text-sm border-0 outline-none"
+        class="bg-white shadow-lg rounded-xl px-3 py-2.5 text-sm border-0 outline-none shrink-0"
       >
         <option :value="null">전체</option>
         <option v-for="city in cities" :key="city.id" :value="city.id">
@@ -302,6 +455,9 @@ onUnmounted(() => {
         </option>
       </select>
     </div>
+
+    <!-- Search overlay (click to close) -->
+    <div v-if="showSearchResults" class="absolute inset-0 z-[999]" @click="closeSearchResults"></div>
 
     <!-- Category Chips -->
     <div class="absolute top-16 left-3 right-3 z-[1000] flex gap-2 overflow-x-auto scrollbar-hide">
