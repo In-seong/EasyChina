@@ -3,12 +3,11 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../shared/api'
 import type { Place, ApiResponse } from '../../shared/types/place'
-import { navigateTo, showPlaceOnMap, isInApp } from '../../shared/utils/bridge'
-
 const route = useRoute()
 const router = useRouter()
 const place = ref<Place | null>(null)
 const showTaxiModal = ref(false)
+const showMiniMap = ref(false)
 const copied = ref(false)
 
 async function fetchPlace() {
@@ -25,16 +24,14 @@ function copyAddress() {
 
 function openInMap() {
   if (!place.value) return
-  if (isInApp()) {
-    showPlaceOnMap(place.value.id, place.value.latitude, place.value.longitude, place.value.name_cn)
-  }
+  router.push(`/map?lat=${place.value.latitude}&lng=${place.value.longitude}&name=${encodeURIComponent(place.value.name_ko)}`)
 }
 
 function startNavigation() {
   if (!place.value) return
-  if (isInApp()) {
-    navigateTo(place.value.latitude, place.value.longitude, place.value.name_cn)
-  }
+  // 고덕지도 웹 길찾기로 연결
+  const url = `https://uri.amap.com/navigation?to=${place.value.longitude},${place.value.latitude},${encodeURIComponent(place.value.name_cn)}&mode=car&src=EasyChina`
+  window.open(url, '_blank')
 }
 
 onMounted(fetchPlace)
