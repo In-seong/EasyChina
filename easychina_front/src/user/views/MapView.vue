@@ -131,25 +131,52 @@ let myLocationCircle: L.Circle | null = null
 let watchId: number | null = null
 const isTracking = ref(false)
 
+// 지도 타일 스타일
+const tileStyles = [
+  { name: '기본', icon: '🗺', url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', attr: '&copy; CartoDB' },
+  { name: '심플', icon: '⬜', url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', attr: '&copy; CartoDB' },
+  { name: '다크', icon: '⬛', url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: '&copy; CartoDB' },
+  { name: '위성', icon: '🛰', url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: '&copy; Esri' },
+]
+const currentTileIdx = ref(0)
+let currentTileLayer: L.TileLayer | null = null
+
 function initMap() {
   if (!mapContainer.value) return
 
   map = L.map(mapContainer.value, {
-    center: [31.2304, 121.4737], // 상하이 기본
+    center: [31.2304, 121.4737],
     zoom: 13,
     zoomControl: false,
   })
 
-  // 타일 레이어 (OSM - API Key 불필요)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap',
-    maxZoom: 19,
-  }).addTo(map)
+  // 기본 타일: CartoDB Voyager (깔끔)
+  setTileStyle(0)
 
   // 줌 컨트롤 우하단
   L.control.zoom({ position: 'bottomright' }).addTo(map)
 
   markersLayer.addTo(map)
+}
+
+function setTileStyle(idx: number) {
+  if (!map) return
+  currentTileIdx.value = idx
+  const style = tileStyles[idx]
+
+  if (currentTileLayer) {
+    map.removeLayer(currentTileLayer)
+  }
+
+  currentTileLayer = L.tileLayer(style.url, {
+    attribution: style.attr,
+    maxZoom: 19,
+  }).addTo(map)
+}
+
+function cycleTileStyle() {
+  const next = (currentTileIdx.value + 1) % tileStyles.length
+  setTileStyle(next)
 }
 
 function toggleMyLocation() {
@@ -487,6 +514,15 @@ onUnmounted(() => {
     <div v-if="loading" class="absolute top-28 left-1/2 -translate-x-1/2 z-[1000]">
       <span class="bg-white shadow-lg rounded-full px-4 py-2 text-xs text-gray-500">불러오는 중...</span>
     </div>
+
+    <!-- Map Style Button -->
+    <button
+      @click="cycleTileStyle"
+      class="absolute bottom-28 right-3 z-[1000] w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center active:bg-gray-100"
+      :title="'지도: ' + tileStyles[currentTileIdx].name"
+    >
+      <span class="text-lg">{{ tileStyles[currentTileIdx].icon }}</span>
+    </button>
 
     <!-- My Location Button -->
     <button
