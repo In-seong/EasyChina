@@ -1,11 +1,18 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Place } from '../../shared/types/place'
 
 const props = defineProps<{ place: Place }>()
 const router = useRouter()
 
-const primaryImage = props.place.images?.find(i => i.is_primary) || props.place.images?.[0]
+// primaryImage는 hasOne이라 place.primary_image로 올 수도 있고, images 배열일 수도 있음
+const imageUrl = computed(() => {
+  const p = props.place as any
+  if (p.primary_image?.image_url) return p.primary_image.image_url
+  if (p.images?.[0]?.image_url) return p.images[0].image_url
+  return null
+})
 
 function priceText(): string {
   if (!props.place.price_min && !props.place.price_max) return ''
@@ -23,10 +30,11 @@ function priceText(): string {
   >
     <div class="aspect-[4/3] bg-gray-100 relative">
       <img
-        v-if="primaryImage"
-        :src="primaryImage.image_url"
+        v-if="imageUrl"
+        :src="imageUrl"
         :alt="place.name_ko"
         class="w-full h-full object-cover"
+        loading="lazy"
       />
       <div v-else class="w-full h-full flex items-center justify-center text-3xl text-gray-300">
         📷

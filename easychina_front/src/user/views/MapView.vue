@@ -567,9 +567,10 @@ onUnmounted(() => {
         <!-- 이미지 -->
         <div class="w-20 h-20 rounded-lg bg-gray-100 shrink-0 overflow-hidden">
           <img
-            v-if="selectedPlace.images?.[0]"
-            :src="selectedPlace.images[0].image_url"
+            v-if="(selectedPlace as any).primary_image?.image_url || selectedPlace.images?.[0]?.image_url"
+            :src="(selectedPlace as any).primary_image?.image_url || selectedPlace.images?.[0]?.image_url"
             class="w-full h-full object-cover"
+            loading="lazy"
           />
           <div v-else class="w-full h-full flex items-center justify-center text-2xl text-gray-300">📷</div>
         </div>
