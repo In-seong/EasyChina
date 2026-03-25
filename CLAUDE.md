@@ -34,7 +34,7 @@ EasyChina/
 1. DB 변경 시 반드시 DB_SCHEMA.md 업데이트
 2. DEV_REFERENCE.md의 코딩 컨벤션 준수
 3. API 응답은 항상 `{ success, data?, message?, errors? }` 형식
-4. 모든 좌표는 GCJ-02 기준 (중국 지도 표준)
+4. 모든 좌표는 WGS-84 기준 (OSM 지도 사용, 중국 GCJ-02 좌표 입력 시 변환 필요)
 5. 장소 데이터는 반드시 한국어 + 중국어 병기
 
 ## API Response Format
