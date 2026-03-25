@@ -41,23 +41,38 @@ interface SearchResult {
 function createMarkerIcon(color: string, label: string) {
   return L.divIcon({
     className: 'custom-marker',
-    html: `<div style="
-      background: ${color};
-      color: white;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 600;
-      white-space: nowrap;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      border: 2px solid white;
-      text-align: center;
-      max-width: 120px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    ">${label}</div>`,
+    html: `
+      <div class="marker-pin" style="
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      ">
+        <div style="
+          background: ${color};
+          color: white;
+          padding: 6px 12px;
+          border-radius: 16px;
+          font-size: 13px;
+          font-weight: 700;
+          white-space: nowrap;
+          box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+          border: 2.5px solid white;
+          text-align: center;
+          letter-spacing: 0.3px;
+        ">${label}</div>
+        <div style="
+          width: 0; height: 0;
+          border-left: 8px solid transparent;
+          border-right: 8px solid transparent;
+          border-top: 10px solid ${color};
+          margin-top: -2px;
+          filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+        "></div>
+      </div>
+    `,
     iconSize: [0, 0],
-    iconAnchor: [0, 0],
+    iconAnchor: [0, 42],
   })
 }
 
@@ -603,6 +618,14 @@ onUnmounted(() => {
 .custom-marker {
   background: transparent !important;
   border: none !important;
+  overflow: visible !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* 마커가 다른 요소에 가려지지 않도록 */
+.leaflet-marker-icon.custom-marker {
+  z-index: 500 !important;
 }
 
 /* 지도 위 검색바 아래로 안 가리게 */
