@@ -1,9 +1,8 @@
 import SwiftUI
 
 @main
-struct EasyChina: App {
+struct EasyChinaApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
     var body: some Scene {
         WindowGroup {
             ContentView()
