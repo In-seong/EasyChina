@@ -1,0 +1,26 @@
+# Dependencies
+easychina_back/vendor/
+easychina_front/node_modules/
+
+# Environment
+easychina_back/.env
+easychina_front/.env
+
+# Build
+easychina_front/dist/
+
+# Storage
+easychina_back/storage/app/public/places/
+easychina_back/storage/app/public/tips/
+easychina_back/storage/logs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Cache
+easychina_back/bootstrap/cache/*.php
+!easychina_back/bootstrap/cache/.gitignore
