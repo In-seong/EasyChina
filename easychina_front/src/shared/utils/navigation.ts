@@ -22,7 +22,9 @@ function tryOpenApp(url: string, fallbackUrl: string, timeout = 1500) {
 }
 
 /**
- * AMap 앱 또는 웹으로 길찾기
+ * AMap 길찾기
+ * 출발지가 있으면 웹 URL로 열기 (앱 URL Scheme은 출발지 지정 불가)
+ * 출발지가 없으면 앱 시도 → 웹 fallback
  */
 export function startAMapNavigation(
   dstLat: number, dstLng: number, dstName: string,
@@ -35,6 +37,13 @@ export function startAMapNavigation(
     webUrl += `&from=${srcLng},${srcLat},${encodeURIComponent(srcName)}`
   }
 
+  // 출발지가 지정된 경우 → 웹 URL만 사용 (앱은 출발지 무시함)
+  if (srcLat && srcLng) {
+    window.open(webUrl, '_blank')
+    return
+  }
+
+  // 출발지 없음 (현재 위치 → 목적지) → 앱 시도
   const appUrl = isIOS()
     ? `iosamap://path?sourceApplication=EasyChina&dlat=${dstLat}&dlon=${dstLng}&dname=${dst}&dev=0&t=0`
     : `amapuri://route/plan/?dlat=${dstLat}&dlon=${dstLng}&dname=${dst}&dev=0&t=0`
