@@ -62,6 +62,9 @@ Route::prefix('admin')->group(function () {
         Route::apiResource('phrases', Admin\PhraseController::class);
         Route::apiResource('banners', Admin\BannerController::class);
 
+        // 번역 도우미
+        Route::post('translate/pinyin', [Admin\TranslateController::class, 'pinyin']);
+
         // 이미지 업로드
         Route::post('places/{place}/images', [Admin\ImageUploadController::class, 'uploadPlaceImage']);
         Route::delete('place-images/{placeImage}', [Admin\ImageUploadController::class, 'deletePlaceImage']);

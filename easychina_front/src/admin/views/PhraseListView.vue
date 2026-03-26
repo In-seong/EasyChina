@@ -10,6 +10,7 @@ const filterCategory = ref<number | ''>('')
 const showForm = ref(false)
 const editingId = ref<number | null>(null)
 const form = ref({ phrase_category_id: '', text_ko: '', text_cn: '', pinyin: '', sort_order: 0 })
+const translating = ref(false)
 
 async function fetchData() {
   const { data } = await api.get('/api/admin/phrase-categories')
@@ -53,6 +54,40 @@ async function remove(id: number) {
   if (!confirm('삭제하시겠습니까?')) return
   await api.delete(`/api/admin/phrases/${id}`)
   fetchPhrases()
+}
+
+// 한국어 → 중국어 + 병음 자동 번역
+async function autoTranslate() {
+  const ko = form.value.text_ko.trim()
+  if (!ko) return
+
+  translating.value = true
+  try {
+    // 한국어 → 중국어 번역 (MyMemory API)
+    const transRes = await fetch(
+      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(ko)}&langpair=ko|zh-CN`
+    )
+    const transData = await transRes.json()
+    const chinese = transData.responseData?.translatedText || ''
+
+    if (chinese) {
+      form.value.text_cn = chinese
+
+      // 중국어 → 병음 변환 (서버 API)
+      try {
+        const pinyinRes = await api.post('/api/admin/translate/pinyin', { text: chinese })
+        form.value.pinyin = pinyinRes.data.data?.pinyin || ''
+      } catch {
+        // 병음 API 실패 시 빈 값
+        form.value.pinyin = ''
+      }
+    }
+  } catch (e) {
+    console.error('Translation error:', e)
+    alert('번역에 실패했습니다. 직접 입력해주세요.')
+  } finally {
+    translating.value = false
+  }
 }
 
 watch(filterCategory, fetchPhrases)
@@ -103,9 +138,25 @@ onMounted(fetchData)
             <option value="">카테고리 선택 *</option>
             <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
           </select>
-          <input v-model="form.text_ko" placeholder="한국어 *" required class="w-full border rounded-lg px-3 py-2 text-sm" />
+
+          <!-- 한국어 입력 + 자동번역 버튼 -->
+          <div class="flex gap-2">
+            <input v-model="form.text_ko" placeholder="한국어 *" required class="flex-1 border rounded-lg px-3 py-2 text-sm" />
+            <button
+              type="button"
+              @click="autoTranslate"
+              :disabled="translating || !form.text_ko.trim()"
+              class="px-3 py-2 bg-green-500 text-white rounded-lg text-sm whitespace-nowrap disabled:opacity-50"
+            >
+              {{ translating ? '번역중...' : '자동번역' }}
+            </button>
+          </div>
+
           <input v-model="form.text_cn" placeholder="중국어 *" required class="w-full border rounded-lg px-3 py-2 text-sm" />
           <input v-model="form.pinyin" placeholder="병음 (pinyin)" class="w-full border rounded-lg px-3 py-2 text-sm" />
+
+          <p class="text-xs text-gray-400">한국어 입력 후 [자동번역] 버튼을 누르면 중국어와 병음이 자동 생성됩니다.</p>
+
           <div class="flex justify-end gap-2 pt-2">
             <button type="button" @click="showForm = false" class="px-4 py-2 text-sm text-gray-500">취소</button>
             <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm">저장</button>
