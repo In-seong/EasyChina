@@ -78,18 +78,24 @@ export function startAMapNavigation(
 export async function callDidiTaxi(
   dstLat: number, dstLng: number, dstName: string,
   srcLat?: number, srcLng?: number, srcName?: string
-): Promise<void> {
+): Promise<boolean> {
   // 목적지 중국어를 클립보드에 복사
+  let copied = false
   try {
     await navigator.clipboard.writeText(dstName)
+    copied = true
   } catch {
-    // clipboard API 실패 시 무시
+    // clipboard API 실패
   }
 
-  const didiAppUrl = isIOS() ? 'diditaxi://' : 'didipublic://'
-  const didiWebUrl = 'https://www.didiglobal.com/download'
+  // 2초 후 앱 열기 (토스트 읽을 시간)
+  setTimeout(() => {
+    const didiAppUrl = isIOS() ? 'diditaxi://' : 'didipublic://'
+    const didiWebUrl = 'https://www.didiglobal.com/download'
+    openAppScheme(didiAppUrl, didiWebUrl)
+  }, 2000)
 
-  openAppScheme(didiAppUrl, didiWebUrl)
+  return copied
 }
 
 export type NavOption = 'amap' | 'didi' | 'web'

@@ -13,6 +13,7 @@ const selectedDay = ref<number>(1)
 const loading = ref(false)
 const showNavModal = ref(false)
 const navTargetIdx = ref(0)
+const toast = ref('')
 
 // 총 일수 계산
 const totalDays = computed(() => {
@@ -86,10 +87,16 @@ function openNavModal(idx: number) {
   showNavModal.value = true
 }
 
-function doNavigate(type: 'amap' | 'didi') {
+function showToast(msg: string) {
+  toast.value = msg
+  setTimeout(() => { toast.value = '' }, 3000)
+}
+
+async function doNavigate(type: 'amap' | 'didi') {
   const item = dayItems.value[navTargetIdx.value]
   if (!item?.place) return
   const src = getNavSource(navTargetIdx.value)
+  showNavModal.value = false
 
   if (type === 'amap') {
     startAMapNavigation(
@@ -97,12 +104,14 @@ function doNavigate(type: 'amap' | 'didi') {
       src?.lat, src?.lng, src?.name
     )
   } else {
-    callDidiTaxi(
+    const copied = await callDidiTaxi(
       Number(item.place.latitude), Number(item.place.longitude), item.place.name_cn,
       src?.lat, src?.lng, src?.name
     )
+    if (copied) {
+      showToast(`📋 "${item.place.name_cn}" 복사됨! DiDi에서 붙여넣기 하세요`)
+    }
   }
-  showNavModal.value = false
 }
 
 function showTaxi(place: any) {
@@ -122,6 +131,17 @@ onMounted(fetchCourse)
 
 <template>
   <div class="pb-20">
+    <!-- Toast -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="toast" class="fixed top-16 left-4 right-4 z-[100] flex justify-center pointer-events-none">
+          <div class="bg-gray-900 text-white text-sm px-5 py-3 rounded-xl shadow-lg max-w-sm text-center">
+            {{ toast }}
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Header -->
     <div class="sticky top-0 z-10 bg-white/90 backdrop-blur px-4 py-3 border-b">
       <div class="flex items-center justify-between">
@@ -270,3 +290,8 @@ onMounted(fetchCourse)
     </Teleport>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>
