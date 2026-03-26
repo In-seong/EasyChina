@@ -326,6 +326,15 @@ function onCityChange() {
 
 function goToDetail(placeId: number) { router.push(`/places/${placeId}`) }
 function closeBottomSheet() { selectedPlace.value = null }
+
+// 바텀시트 스와이프 닫기
+let sheetTouchStartY = 0
+function onSheetTouchStart(e: TouchEvent) { sheetTouchStartY = e.touches[0].clientY }
+function onSheetTouchMove(e: TouchEvent) { /* 스와이프 중 */ }
+function onSheetTouchEnd(e: TouchEvent) {
+  const diff = e.changedTouches[0].clientY - sheetTouchStartY
+  if (diff > 60) closeBottomSheet() // 60px 이상 아래로 스와이프하면 닫기
+}
 function copyAddress(address: string) { navigator.clipboard.writeText(address) }
 
 watch(selectedCity, onCityChange)
@@ -446,13 +455,22 @@ onUnmounted(() => {
       <span class="bg-white/90 shadow rounded-full px-3 py-1.5 text-xs text-gray-500">📍 {{ places.length }}개 장소</span>
     </div>
 
+    <!-- Bottom Sheet Backdrop (빈 영역 터치로 닫기) -->
+    <div
+      v-if="selectedPlace"
+      class="absolute inset-0 z-[9]"
+      @click="closeBottomSheet"
+    ></div>
+
     <!-- Bottom Sheet -->
     <div
       v-if="selectedPlace"
-      class="absolute bottom-0 left-0 right-0 z-[10] bg-white rounded-t-2xl shadow-2xl p-4 transition-transform"
-      @click.self="closeBottomSheet"
+      class="absolute bottom-0 left-0 right-0 z-[10] bg-white rounded-t-2xl shadow-2xl p-4"
+      @touchstart="onSheetTouchStart"
+      @touchmove="onSheetTouchMove"
+      @touchend="onSheetTouchEnd"
     >
-      <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3" @click="closeBottomSheet"></div>
+      <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3"></div>
       <div class="flex gap-3">
         <div class="w-20 h-20 rounded-lg bg-gray-100 shrink-0 overflow-hidden">
           <img
@@ -462,7 +480,7 @@ onUnmounted(() => {
           />
           <div v-else class="w-full h-full flex items-center justify-center text-2xl text-gray-300">📷</div>
         </div>
-        <div class="flex-1 min-w-0">
+        <div class="flex-1 min-w-0" @click="goToDetail(selectedPlace!.id)">
           <h3 class="font-bold text-gray-900 truncate">{{ selectedPlace.name_ko }}</h3>
           <p class="text-xs text-gray-400 truncate">{{ selectedPlace.name_cn }}</p>
           <div class="flex items-center gap-2 mt-1">
