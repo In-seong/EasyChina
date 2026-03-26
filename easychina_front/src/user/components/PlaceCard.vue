@@ -2,16 +2,14 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Place } from '../../shared/types/place'
+import { imageUrl } from '../../shared/utils/image'
 
 const props = defineProps<{ place: Place }>()
 const router = useRouter()
 
-// primaryImage는 hasOne이라 place.primary_image로 올 수도 있고, images 배열일 수도 있음
-const imageUrl = computed(() => {
+const imgSrc = computed(() => {
   const p = props.place as any
-  if (p.primary_image?.image_url) return p.primary_image.image_url
-  if (p.images?.[0]?.image_url) return p.images[0].image_url
-  return null
+  return imageUrl(p.primary_image?.image_url || p.images?.[0]?.image_url)
 })
 
 function priceText(): string {
@@ -30,8 +28,8 @@ function priceText(): string {
   >
     <div class="aspect-[4/3] bg-gray-100 relative">
       <img
-        v-if="imageUrl"
-        :src="imageUrl"
+        v-if="imgSrc"
+        :src="imgSrc"
         :alt="place.name_ko"
         class="w-full h-full object-cover"
         loading="lazy"

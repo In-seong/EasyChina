@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../shared/api'
 import type { Place, ApiResponse } from '../../shared/types/place'
+import { imageUrl } from '../../shared/utils/image'
 const route = useRoute()
 const router = useRouter()
 const place = ref<Place | null>(null)
@@ -51,7 +52,7 @@ onMounted(fetchPlace)
         <img
           v-for="img in place.images"
           :key="img.id"
-          :src="img.image_url"
+          :src="imageUrl(img.image_url)"
           class="w-full h-full object-cover snap-center shrink-0"
         />
       </div>

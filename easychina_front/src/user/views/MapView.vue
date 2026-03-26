@@ -5,6 +5,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import api from '../../shared/api'
 import type { Place, City, Category, ApiResponse, PaginatedResponse } from '../../shared/types/place'
+import { imageUrl } from '../../shared/utils/image'
 
 const router = useRouter()
 const route = useRoute()
@@ -567,8 +568,8 @@ onUnmounted(() => {
         <!-- 이미지 -->
         <div class="w-20 h-20 rounded-lg bg-gray-100 shrink-0 overflow-hidden">
           <img
-            v-if="(selectedPlace as any).primary_image?.image_url || selectedPlace.images?.[0]?.image_url"
-            :src="(selectedPlace as any).primary_image?.image_url || selectedPlace.images?.[0]?.image_url"
+            v-if="imageUrl((selectedPlace as any).primary_image?.image_url || selectedPlace.images?.[0]?.image_url)"
+            :src="imageUrl((selectedPlace as any).primary_image?.image_url || selectedPlace.images?.[0]?.image_url)!"
             class="w-full h-full object-cover"
             loading="lazy"
           />
