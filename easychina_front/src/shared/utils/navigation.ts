@@ -72,24 +72,22 @@ export function startAMapNavigation(
 
 /**
  * DiDi 택시 호출
+ * DiDi는 목적지 파라미터를 공식 지원하지 않음
+ * → 목적지를 클립보드에 복사 후 앱 열기
  */
-export function callDidiTaxi(
+export async function callDidiTaxi(
   dstLat: number, dstLng: number, dstName: string,
   srcLat?: number, srcLng?: number, srcName?: string
-) {
-  const dst = encodeURIComponent(dstName)
-
-  let didiAppUrl: string
-  if (isIOS()) {
-    didiAppUrl = `diditaxi://passenger?action=create_order&dlat=${dstLat}&dlng=${dstLng}&dname=${dst}`
-  } else {
-    didiAppUrl = `didipublic://passenger?action=create_order&dlat=${dstLat}&dlng=${dstLng}&dname=${dst}`
-  }
-  if (srcLat && srcLng) {
-    didiAppUrl += `&flat=${srcLat}&flng=${srcLng}&fname=${encodeURIComponent(srcName || '')}`
+): Promise<void> {
+  // 목적지 중국어를 클립보드에 복사
+  try {
+    await navigator.clipboard.writeText(dstName)
+  } catch {
+    // clipboard API 실패 시 무시
   }
 
-  const didiWebUrl = `https://common.diditaxi.com.cn/general/default/redirect?dlat=${dstLat}&dlng=${dstLng}&dname=${dst}`
+  const didiAppUrl = isIOS() ? 'diditaxi://' : 'didipublic://'
+  const didiWebUrl = 'https://www.didiglobal.com/download'
 
   openAppScheme(didiAppUrl, didiWebUrl)
 }

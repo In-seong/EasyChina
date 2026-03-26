@@ -259,7 +259,7 @@ onMounted(fetchCourse)
               <span class="text-2xl">🚕</span>
               <div class="text-left">
                 <p class="text-sm font-semibold text-gray-800">DiDi 택시 호출</p>
-                <p class="text-xs text-gray-400">택시를 불러서 이동</p>
+                <p class="text-xs text-gray-400">목적지 복사 후 DiDi 앱 열기</p>
               </div>
             </button>
           </div>
