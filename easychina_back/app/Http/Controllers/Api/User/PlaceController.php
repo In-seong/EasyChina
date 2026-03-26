@@ -25,7 +25,7 @@ class PlaceController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $query->paginate(20),
+            'data' => $query->paginate($request->input('per_page', 6)),
         ]);
     }
 
