@@ -65,8 +65,30 @@ interface SearchResult {
 
 function getStyleUrl() {
   const style = tileStyles[currentTileIdx.value].style
+  return `https://api.maptiler.com/maps/${style}/style.json?key=${MAPTILER_KEY}`
+}
+
+// 스타일 JSON의 text-field를 원하는 언어로 교체
+async function getLocalizedStyle(): Promise<any> {
+  const url = getStyleUrl()
+  const res = await fetch(url)
+  const style = await res.json()
   const lang = langOptions[currentLangIdx.value].code
-  return `https://api.maptiler.com/maps/${style}/style.json?key=${MAPTILER_KEY}&language=${lang}`
+
+  // 모든 레이어의 text-field에서 언어 교체
+  for (const layer of style.layers) {
+    const tf = layer.layout?.['text-field']
+    if (tf) {
+      if (Array.isArray(tf)) {
+        // ['coalesce', ['get', 'name:en'], ['get', 'name']] 형태를 교체
+        layer.layout['text-field'] = ['coalesce', ['get', `name:${lang}`], ['get', 'name:en'], ['get', 'name']]
+      } else if (typeof tf === 'string' && tf.includes('name')) {
+        layer.layout['text-field'] = ['coalesce', ['get', `name:${lang}`], ['get', 'name']]
+      }
+    }
+  }
+
+  return style
 }
 
 async function fetchFilters() {
@@ -110,30 +132,23 @@ async function fetchPlaces() {
 }
 
 function createMarkerEl(color: string, label: string): HTMLDivElement {
-  const el = document.createElement('div')
-  el.innerHTML = `
-    <div style="
-      display: flex; flex-direction: column; align-items: center; cursor: pointer;
-    ">
-      <div style="
-        background: ${color}; color: white;
-        padding: 5px 10px; border-radius: 14px;
-        font-size: 12px; font-weight: 700;
-        white-space: nowrap;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.35);
-        border: 2px solid white;
-        letter-spacing: 0.3px;
-      ">${label}</div>
-      <div style="
-        width: 0; height: 0;
-        border-left: 7px solid transparent;
-        border-right: 7px solid transparent;
-        border-top: 9px solid ${color};
-        margin-top: -1px;
-      "></div>
-    </div>
-  `
-  return el
+  const wrapper = document.createElement('div')
+  wrapper.style.cssText = 'cursor: pointer; pointer-events: auto;'
+
+  const container = document.createElement('div')
+  container.style.cssText = 'display: flex; flex-direction: column; align-items: center;'
+
+  const badge = document.createElement('div')
+  badge.style.cssText = `background: ${color}; color: white; padding: 5px 10px; border-radius: 14px; font-size: 12px; font-weight: 700; white-space: nowrap; box-shadow: 0 3px 8px rgba(0,0,0,0.35); border: 2px solid white; letter-spacing: 0.3px; pointer-events: none;`
+  badge.textContent = label
+
+  const arrow = document.createElement('div')
+  arrow.style.cssText = `width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 9px solid ${color}; margin-top: -1px; pointer-events: none;`
+
+  container.appendChild(badge)
+  container.appendChild(arrow)
+  wrapper.appendChild(container)
+  return wrapper
 }
 
 function renderMarkers() {
@@ -158,13 +173,15 @@ function renderMarkers() {
   })
 }
 
-function initMap() {
+async function initMap() {
   if (!mapContainer.value) return
+
+  const style = await getLocalizedStyle()
 
   map = new maplibregl.Map({
     container: mapContainer.value,
-    style: getStyleUrl(),
-    center: [121.4737, 31.2304], // 상하이
+    style,
+    center: [121.4737, 31.2304],
     zoom: 13,
   })
 
@@ -189,16 +206,17 @@ function initMap() {
   })
 }
 
-function cycleTileStyle() {
+async function cycleTileStyle() {
   currentTileIdx.value = (currentTileIdx.value + 1) % tileStyles.length
-  if (map) map.setStyle(getStyleUrl())
-  // 스타일 변경 후 마커 재렌더
+  const style = await getLocalizedStyle()
+  if (map) map.setStyle(style)
   map?.once('styledata', () => renderMarkers())
 }
 
-function cycleLang() {
+async function cycleLang() {
   currentLangIdx.value = (currentLangIdx.value + 1) % langOptions.length
-  if (map) map.setStyle(getStyleUrl())
+  const style = await getLocalizedStyle()
+  if (map) map.setStyle(style)
   map?.once('styledata', () => renderMarkers())
 }
 
