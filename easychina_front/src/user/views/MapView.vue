@@ -464,7 +464,7 @@ onUnmounted(() => {
         <!-- Search Results Dropdown -->
         <div
           v-if="showSearchResults"
-          class="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg max-h-72 overflow-y-auto"
+          class="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg max-h-72 overflow-y-auto z-[1100]"
         >
           <div v-if="searching" class="p-4 text-center text-xs text-gray-400">검색 중...</div>
           <div v-else-if="searchResults.length === 0" class="p-4 text-center text-xs text-gray-400">결과 없음</div>
@@ -500,10 +500,10 @@ onUnmounted(() => {
     </div>
 
     <!-- Search overlay (click to close) -->
-    <div v-if="showSearchResults" class="absolute inset-0 z-[999]" @click="closeSearchResults"></div>
+    <div v-if="showSearchResults" class="absolute inset-0 z-[1050]" @click="closeSearchResults"></div>
 
     <!-- Category Chips -->
-    <div class="absolute top-16 left-3 right-3 z-[1000] flex gap-2 overflow-x-auto scrollbar-hide">
+    <div v-if="!showSearchResults" class="absolute top-16 left-3 right-3 z-[1000] flex gap-2 overflow-x-auto scrollbar-hide">
       <button
         @click="selectCategory(null)"
         class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium shadow-md transition-colors"
