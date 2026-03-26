@@ -147,12 +147,23 @@ let myLocationCircle: L.Circle | null = null
 let watchId: number | null = null
 const isTracking = ref(false)
 
+// MapTiler API Key
+const MAPTILER_KEY = 'rYfnlvyg9JE0z3VidiZT'
+
+// 언어 설정
+const langOptions = [
+  { code: 'ko', label: '한국어', icon: '🇰🇷' },
+  { code: 'zh', label: '中文', icon: '🇨🇳' },
+  { code: 'en', label: 'EN', icon: '🇺🇸' },
+]
+const currentLangIdx = ref(0)
+
 // 지도 타일 스타일
 const tileStyles = [
-  { name: '기본', icon: '🗺', url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', attr: '&copy; CartoDB' },
-  { name: '심플', icon: '⬜', url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', attr: '&copy; CartoDB' },
-  { name: '다크', icon: '⬛', url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: '&copy; CartoDB' },
-  { name: '위성', icon: '🛰', url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: '&copy; Esri' },
+  { name: '기본', icon: '🗺', url: `https://api.maptiler.com/maps/streets/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`, attr: '&copy; MapTiler &copy; OSM', lang: true },
+  { name: '심플', icon: '⬜', url: `https://api.maptiler.com/maps/dataviz-light/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`, attr: '&copy; MapTiler', lang: true },
+  { name: '다크', icon: '⬛', url: `https://api.maptiler.com/maps/dataviz-dark/256/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`, attr: '&copy; MapTiler', lang: true },
+  { name: '위성', icon: '🛰', url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: '&copy; Esri', lang: false },
 ]
 const currentTileIdx = ref(0)
 let currentTileLayer: L.TileLayer | null = null
@@ -175,6 +186,14 @@ function initMap() {
   markersLayer.addTo(map)
 }
 
+function getTileUrl(style: typeof tileStyles[0]) {
+  if (style.lang) {
+    const lang = langOptions[currentLangIdx.value].code
+    return style.url + `&language=${lang}`
+  }
+  return style.url
+}
+
 function setTileStyle(idx: number) {
   if (!map) return
   currentTileIdx.value = idx
@@ -184,7 +203,7 @@ function setTileStyle(idx: number) {
     map.removeLayer(currentTileLayer)
   }
 
-  currentTileLayer = L.tileLayer(style.url, {
+  currentTileLayer = L.tileLayer(getTileUrl(style), {
     attribution: style.attr,
     maxZoom: 19,
   }).addTo(map)
@@ -193,6 +212,12 @@ function setTileStyle(idx: number) {
 function cycleTileStyle() {
   const next = (currentTileIdx.value + 1) % tileStyles.length
   setTileStyle(next)
+}
+
+function cycleLang() {
+  currentLangIdx.value = (currentLangIdx.value + 1) % langOptions.length
+  // 타일 새로고침
+  setTileStyle(currentTileIdx.value)
 }
 
 function toggleMyLocation() {
@@ -534,6 +559,15 @@ onUnmounted(() => {
     <div v-if="loading" class="absolute top-28 left-1/2 -translate-x-1/2 z-[1000]">
       <span class="bg-white shadow-lg rounded-full px-4 py-2 text-xs text-gray-500">불러오는 중...</span>
     </div>
+
+    <!-- Language Toggle Button -->
+    <button
+      @click="cycleLang"
+      class="absolute bottom-40 right-3 z-[1000] w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center active:bg-gray-100"
+      :title="'언어: ' + langOptions[currentLangIdx].label"
+    >
+      <span class="text-sm">{{ langOptions[currentLangIdx].icon }}</span>
+    </button>
 
     <!-- Map Style Button -->
     <button

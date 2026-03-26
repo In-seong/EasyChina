@@ -22,13 +22,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		091CC8C43E93C7FD15275C13 /* EasyChina-User.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "EasyChina-User.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		091CC8C43E93C7FD15275C13 /* EasyChina.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EasyChina.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1328A0183BB03B25B337FFDF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		20B3A6B859C05E3BE22ACC76 /* Info-Admin.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Info-Admin.plist"; sourceTree = "<group>"; };
 		4BAF6858B83E70295435018F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A3BD30539C0D54D05776B087 /* Info-User.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Info-User.plist"; sourceTree = "<group>"; };
 		B6E3F86C060D0075F934C0BC /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
-		BCF8E4DCFBF2571853FC874F /* EasyChina-Admin.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "EasyChina-Admin.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BCF8E4DCFBF2571853FC874F /* EasyChina-Admin.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; name = "EasyChina-Admin.app"; path = "EasyChina Admin.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E15E99975DD129A69ACFC6B0 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		FE6FA0B222B967B7B5011522 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		FE9AF6C5006AD5B8B2B33915 /* EasyChinaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EasyChinaApp.swift; sourceTree = "<group>"; };
@@ -78,7 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				BCF8E4DCFBF2571853FC874F /* EasyChina-Admin.app */,
-				091CC8C43E93C7FD15275C13 /* EasyChina-User.app */,
+				091CC8C43E93C7FD15275C13 /* EasyChina.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -127,7 +127,7 @@
 			packageProductDependencies = (
 			);
 			productName = "EasyChina-User";
-			productReference = 091CC8C43E93C7FD15275C13 /* EasyChina-User.app */;
+			productReference = 091CC8C43E93C7FD15275C13 /* EasyChina.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -140,9 +140,6 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					9E59A84A2564E5FBA60177E5 = {
-						DevelopmentTeam = "";
-					};
-					C23CB7ED39FAE9CD5D96D311 = {
 						DevelopmentTeam = "";
 					};
 				};
@@ -321,6 +318,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 92L3HRKJ3R;
 				INFOPLIST_FILE = "EasyChina/plist/Info-User.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -398,6 +396,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 92L3HRKJ3R;
 				INFOPLIST_FILE = "EasyChina/plist/Info-User.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
