@@ -178,10 +178,43 @@ onMounted(fetchPlace)
         @click="showTaxiModal = false"
       >
         <button class="absolute top-4 right-4 text-gray-400 text-xl">✕</button>
-        <p class="text-lg text-gray-500 mb-6">师傅，请到这里：</p>
-        <p class="text-4xl font-bold text-gray-900 text-center mb-4">{{ place.name_cn }}</p>
-        <p class="text-2xl text-gray-700 text-center leading-relaxed">{{ place.address_cn }}</p>
-        <p class="text-xl text-gray-500 mt-8">谢谢！</p>
+
+        <!-- 기사님께 보여주는 부분 -->
+        <p class="text-lg text-gray-400 mb-2">师傅，请到这里：</p>
+        <p class="text-xs text-gray-400 mb-6">(shīfu, qǐng dào zhèlǐ - 기사님, 여기로 가주세요)</p>
+
+        <p class="text-4xl font-bold text-gray-900 text-center mb-1">{{ place.name_cn }}</p>
+        <p class="text-sm text-gray-400 text-center mb-4">{{ place.name_ko }}</p>
+
+        <p class="text-2xl text-gray-700 text-center leading-relaxed mb-1">{{ place.address_cn }}</p>
+        <p v-if="place.address_ko" class="text-xs text-gray-400 text-center mb-6">{{ place.address_ko }}</p>
+
+        <p class="text-xl text-gray-400 mt-4">谢谢！</p>
+        <p class="text-xs text-gray-400 mt-1">(xièxie - 감사합니다)</p>
+
+        <!-- 직접 말해보기 가이드 -->
+        <div class="mt-8 w-full max-w-sm bg-gray-50 rounded-xl p-4" @click.stop>
+          <p class="text-xs font-semibold text-gray-500 mb-2 text-center">직접 말해보기</p>
+          <div class="space-y-2 text-center">
+            <div>
+              <p class="text-sm text-gray-700">请到 <span class="font-bold">{{ place.name_cn }}</span></p>
+              <p class="text-xs text-blue-500">qǐng dào <span class="font-bold">{{ place.pinyin || place.name_cn }}</span></p>
+              <p class="text-xs text-gray-400">"{{ place.name_ko }}(으)로 가주세요"</p>
+            </div>
+            <hr class="border-gray-200" />
+            <div>
+              <p class="text-sm text-gray-700">请打表</p>
+              <p class="text-xs text-blue-500">qǐng dǎ biǎo</p>
+              <p class="text-xs text-gray-400">"미터기 켜주세요"</p>
+            </div>
+            <hr class="border-gray-200" />
+            <div>
+              <p class="text-sm text-gray-700">到了，谢谢</p>
+              <p class="text-xs text-blue-500">dào le, xièxie</p>
+              <p class="text-xs text-gray-400">"다 왔어요, 감사합니다"</p>
+            </div>
+          </div>
+        </div>
       </div>
     </Teleport>
   </div>
