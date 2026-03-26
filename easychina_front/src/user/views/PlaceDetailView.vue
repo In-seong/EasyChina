@@ -4,12 +4,29 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../../shared/api'
 import type { Place, ApiResponse } from '../../shared/types/place'
 import { imageUrl } from '../../shared/utils/image'
+import { useAuth } from '../../shared/composables/useAuth'
+import { useBookmark } from '../../shared/composables/useBookmark'
+
 const route = useRoute()
 const router = useRouter()
+const { isLoggedIn } = useAuth()
+const { isBookmarked, toggleBookmark, loadBookmarks } = useBookmark()
 const place = ref<Place | null>(null)
 const showTaxiModal = ref(false)
 const showMiniMap = ref(false)
 const copied = ref(false)
+const bookmarking = ref(false)
+
+async function handleBookmark() {
+  if (!place.value) return
+  if (!isLoggedIn.value) {
+    router.push('/mypage')
+    return
+  }
+  bookmarking.value = true
+  await toggleBookmark(place.value.id)
+  bookmarking.value = false
+}
 
 async function fetchPlace() {
   const { data } = await api.get<ApiResponse<Place>>(`/api/user/places/${route.params.id}`)
@@ -56,7 +73,10 @@ function startNavigation() {
   }
 }
 
-onMounted(fetchPlace)
+onMounted(() => {
+  fetchPlace()
+  if (isLoggedIn.value) loadBookmarks()
+})
 </script>
 
 <template>
@@ -64,7 +84,14 @@ onMounted(fetchPlace)
     <!-- Back Button -->
     <div class="sticky top-0 z-10 bg-white/90 backdrop-blur px-4 py-3 flex items-center justify-between border-b">
       <button @click="router.back()" class="text-gray-600">← 뒤로</button>
-      <button class="text-gray-400">🔖</button>
+      <button
+        @click="handleBookmark"
+        :disabled="bookmarking"
+        class="text-xl"
+        :class="place && isBookmarked(place.id) ? 'text-yellow-500' : 'text-gray-300'"
+      >
+        {{ place && isBookmarked(place.id) ? '⭐' : '☆' }}
+      </button>
     </div>
 
     <!-- Images -->
