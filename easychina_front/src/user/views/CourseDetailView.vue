@@ -4,13 +4,15 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../../shared/api'
 import type { TravelCourse } from '../../shared/types/place'
 import { imageUrl } from '../../shared/utils/image'
-import { startAMapNavigation } from '../../shared/utils/navigation'
+import { startAMapNavigation, callDidiTaxi } from '../../shared/utils/navigation'
 
 const route = useRoute()
 const router = useRouter()
 const course = ref<TravelCourse | null>(null)
 const selectedDay = ref<number>(1)
 const loading = ref(false)
+const showNavModal = ref(false)
+const navTargetIdx = ref(0)
 
 // 총 일수 계산
 const totalDays = computed(() => {
@@ -71,20 +73,36 @@ function getPlaceImage(item: any): string | null {
   return imageUrl(p.primary_image?.image_url || p.images?.[0]?.image_url)
 }
 
-function navigateToPlace(place: any, idx: number) {
-  // 이전 장소가 있으면 출발지로 설정
-  let srcLat, srcLng, srcName
+function getNavSource(idx: number) {
   if (idx > 0 && dayItems.value[idx - 1]?.place) {
     const prev = dayItems.value[idx - 1].place
-    srcLat = Number(prev.latitude)
-    srcLng = Number(prev.longitude)
-    srcName = prev.name_cn
+    return { lat: Number(prev.latitude), lng: Number(prev.longitude), name: prev.name_cn }
   }
+  return null
+}
 
-  startAMapNavigation(
-    Number(place.latitude), Number(place.longitude), place.name_cn,
-    srcLat, srcLng, srcName
-  )
+function openNavModal(idx: number) {
+  navTargetIdx.value = idx
+  showNavModal.value = true
+}
+
+function doNavigate(type: 'amap' | 'didi') {
+  const item = dayItems.value[navTargetIdx.value]
+  if (!item?.place) return
+  const src = getNavSource(navTargetIdx.value)
+
+  if (type === 'amap') {
+    startAMapNavigation(
+      Number(item.place.latitude), Number(item.place.longitude), item.place.name_cn,
+      src?.lat, src?.lng, src?.name
+    )
+  } else {
+    callDidiTaxi(
+      Number(item.place.latitude), Number(item.place.longitude), item.place.name_cn,
+      src?.lat, src?.lng, src?.name
+    )
+  }
+  showNavModal.value = false
 }
 
 function showTaxi(place: any) {
@@ -184,14 +202,14 @@ onMounted(fetchCourse)
           <!-- 액션 버튼 -->
           <div class="flex border-t border-gray-50">
             <button
-              @click="navigateToPlace(item.place, idx)"
+              @click="openNavModal(idx)"
               class="flex-1 py-2 text-xs text-blue-500 font-medium active:bg-gray-50"
             >📍 {{ idx > 0 ? dayItems[idx-1].place?.name_ko + '에서' : '길찾기' }}</button>
             <div class="w-px bg-gray-50"></div>
             <button
               @click="showTaxi(item.place)"
               class="flex-1 py-2 text-xs text-yellow-600 font-medium active:bg-gray-50"
-            >🚕 택시</button>
+            >🚕 택시 보여주기</button>
             <div class="w-px bg-gray-50"></div>
             <button
               @click="router.push(`/places/${item.place?.id}`)"
@@ -210,5 +228,45 @@ onMounted(fetchCourse)
         </div>
       </div>
     </template>
+
+    <!-- Navigation Option Modal -->
+    <Teleport to="body">
+      <div v-if="showNavModal" class="fixed inset-0 z-50 bg-black/30 flex items-end justify-center">
+        <div class="bg-white rounded-t-2xl w-full max-w-lg p-5" @click.stop>
+          <h3 class="text-base font-bold mb-1">길찾기 방법 선택</h3>
+          <p v-if="navTargetIdx > 0 && dayItems[navTargetIdx-1]?.place" class="text-xs text-gray-400 mb-3">
+            {{ dayItems[navTargetIdx-1].place.name_ko }} → {{ dayItems[navTargetIdx]?.place?.name_ko }}
+          </p>
+          <p v-else class="text-xs text-gray-400 mb-3">
+            현재 위치 → {{ dayItems[navTargetIdx]?.place?.name_ko }}
+          </p>
+
+          <div class="space-y-2">
+            <button
+              @click="doNavigate('amap')"
+              class="w-full flex items-center gap-3 bg-gray-50 rounded-xl p-4 active:bg-gray-100"
+            >
+              <span class="text-2xl">🗺</span>
+              <div class="text-left">
+                <p class="text-sm font-semibold text-gray-800">고덕지도 (AMap)</p>
+                <p class="text-xs text-gray-400">직접 네비게이션으로 안내</p>
+              </div>
+            </button>
+            <button
+              @click="doNavigate('didi')"
+              class="w-full flex items-center gap-3 bg-gray-50 rounded-xl p-4 active:bg-gray-100"
+            >
+              <span class="text-2xl">🚕</span>
+              <div class="text-left">
+                <p class="text-sm font-semibold text-gray-800">DiDi 택시 호출</p>
+                <p class="text-xs text-gray-400">택시를 불러서 이동</p>
+              </div>
+            </button>
+          </div>
+
+          <button @click="showNavModal = false" class="w-full mt-3 py-2 text-sm text-gray-400">닫기</button>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>

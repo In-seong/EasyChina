@@ -80,7 +80,7 @@ extension WebViewCoordinator: WKNavigationDelegate {
         let scheme = url.scheme ?? ""
 
         // 외부 앱 URL Scheme
-        if ["iosamap", "baidumap", "comgooglemaps", "tel", "mailto", "sms"].contains(scheme) {
+        if ["iosamap", "baidumap", "comgooglemaps", "diditaxi", "didipublic", "tel", "mailto", "sms"].contains(scheme) {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
             decisionHandler(.cancel)
             return
