@@ -3,21 +3,33 @@ const isAndroid = () => /Android/i.test(navigator.userAgent)
 const isMobile = () => isIOS() || isAndroid()
 
 /**
- * 숨겨진 iframe으로 앱 열기 시도
+ * 외부 URL 열기 (웹뷰 호환)
+ * window.open은 웹뷰에서 차단되므로 <a> 태그 클릭으로 처리
  */
-function tryOpenApp(url: string, fallbackUrl: string, timeout = 1500) {
-  if (isMobile()) {
-    const iframe = document.createElement('iframe')
-    iframe.style.display = 'none'
-    iframe.src = url
-    document.body.appendChild(iframe)
+function openUrl(url: string) {
+  const a = document.createElement('a')
+  a.href = url
+  a.target = '_blank'
+  a.rel = 'noopener noreferrer'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+}
 
+/**
+ * 앱 URL Scheme 열기 시도 → 실패 시 웹 fallback
+ */
+function tryOpenApp(appUrl: string, webUrl: string, timeout = 1500) {
+  if (isMobile()) {
+    // 앱 열기 시도
+    window.location.href = appUrl
+
+    // 앱이 안 열리면 웹으로 (앱이 열리면 이 타이머는 실행 안됨)
     setTimeout(() => {
-      document.body.removeChild(iframe)
-      window.open(fallbackUrl, '_blank')
+      openUrl(webUrl)
     }, timeout)
   } else {
-    window.open(fallbackUrl, '_blank')
+    openUrl(webUrl)
   }
 }
 
@@ -39,7 +51,7 @@ export function startAMapNavigation(
 
   // 출발지가 지정된 경우 → 웹 URL만 사용 (앱은 출발지 무시함)
   if (srcLat && srcLng) {
-    window.open(webUrl, '_blank')
+    openUrl(webUrl)
     return
   }
 
@@ -60,31 +72,24 @@ export function callDidiTaxi(
 ) {
   const dst = encodeURIComponent(dstName)
 
-  // DiDi 앱 URL Scheme
   let didiAppUrl: string
   if (isIOS()) {
-    // iOS DiDi URL Scheme
     didiAppUrl = `diditaxi://passenger?action=create_order&dlat=${dstLat}&dlng=${dstLng}&dname=${dst}`
     if (srcLat && srcLng) {
       didiAppUrl += `&flat=${srcLat}&flng=${srcLng}&fname=${encodeURIComponent(srcName || '')}`
     }
   } else {
-    // Android DiDi URL Scheme
     didiAppUrl = `didipublic://passenger?action=create_order&dlat=${dstLat}&dlng=${dstLng}&dname=${dst}`
     if (srcLat && srcLng) {
       didiAppUrl += `&flat=${srcLat}&flng=${srcLng}&fname=${encodeURIComponent(srcName || '')}`
     }
   }
 
-  // DiDi 웹 fallback (미니프로그램 or 다운로드 페이지)
   const didiWebUrl = `https://common.diditaxi.com.cn/general/default/redirect?dlat=${dstLat}&dlng=${dstLng}&dname=${dst}`
 
   tryOpenApp(didiAppUrl, didiWebUrl)
 }
 
-/**
- * 길찾기 옵션 선택 (AMap / DiDi / 웹)
- */
 export type NavOption = 'amap' | 'didi' | 'web'
 
 export function getNavOptions(): { key: NavOption; label: string; icon: string; desc: string }[] {
