@@ -460,35 +460,6 @@ onUnmounted(() => {
           @click="searchQuery = ''; searchResults = []; showSearchResults = false; fetchPlaces()"
           class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
         >✕</button>
-
-        <!-- Search Results Dropdown -->
-        <div
-          v-if="showSearchResults"
-          @click.stop
-          @touchmove.stop
-          class="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg max-h-72 overflow-y-auto z-[1100] overscroll-contain"
-        >
-          <div v-if="searching" class="p-4 text-center text-xs text-gray-400">검색 중...</div>
-          <div v-else-if="searchResults.length === 0" class="p-4 text-center text-xs text-gray-400">결과 없음</div>
-          <template v-else>
-            <button
-              v-for="(result, idx) in searchResults"
-              :key="idx"
-              @click="selectSearchResult(result)"
-              class="w-full text-left px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 active:bg-gray-100"
-            >
-              <div class="flex items-center gap-2">
-                <span class="text-xs px-1.5 py-0.5 rounded-full shrink-0"
-                      :class="result.type === 'db' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'">
-                  {{ result.type === 'db' ? (result.category || '등록') : '지도' }}
-                </span>
-                <span class="text-sm font-medium text-gray-800 truncate">{{ result.name }}</span>
-              </div>
-              <p v-if="result.nameCn" class="text-xs text-gray-400 mt-0.5 ml-12">{{ result.nameCn }}</p>
-              <p v-else-if="result.address" class="text-xs text-gray-400 mt-0.5 ml-12 truncate">{{ result.address }}</p>
-            </button>
-          </template>
-        </div>
       </div>
       <select
         v-model="selectedCity"
@@ -501,8 +472,39 @@ onUnmounted(() => {
       </select>
     </div>
 
-    <!-- Search overlay (click to close) -->
-    <div v-if="showSearchResults" class="absolute inset-0 z-[1050]" @click="closeSearchResults"></div>
+    <!-- Search Results Dropdown (부모 밖으로 분리) -->
+    <div
+      v-if="showSearchResults"
+      class="absolute top-14 left-3 right-16 z-[1100]"
+    >
+      <!-- 배경 클릭으로 닫기 -->
+      <div class="fixed inset-0" @click="closeSearchResults"></div>
+      <div
+        class="relative bg-white rounded-xl shadow-lg max-h-72 overflow-y-auto overscroll-contain"
+        @click.stop
+      >
+        <div v-if="searching" class="p-4 text-center text-xs text-gray-400">검색 중...</div>
+        <div v-else-if="searchResults.length === 0" class="p-4 text-center text-xs text-gray-400">결과 없음</div>
+        <template v-else>
+          <button
+            v-for="(result, idx) in searchResults"
+            :key="idx"
+            @click="selectSearchResult(result)"
+            class="w-full text-left px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 active:bg-gray-100"
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-1.5 py-0.5 rounded-full shrink-0"
+                    :class="result.type === 'db' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'">
+                {{ result.type === 'db' ? (result.category || '등록') : '지도' }}
+              </span>
+              <span class="text-sm font-medium text-gray-800 truncate">{{ result.name }}</span>
+            </div>
+            <p v-if="result.nameCn" class="text-xs text-gray-400 mt-0.5 ml-12">{{ result.nameCn }}</p>
+            <p v-else-if="result.address" class="text-xs text-gray-400 mt-0.5 ml-12 truncate">{{ result.address }}</p>
+          </button>
+        </template>
+      </div>
+    </div>
 
     <!-- Category Chips -->
     <div v-if="!showSearchResults" class="absolute top-16 left-3 right-3 z-[1000] flex gap-2 overflow-x-auto scrollbar-hide">
