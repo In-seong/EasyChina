@@ -69,6 +69,34 @@ extension WebViewCoordinator: WKNavigationDelegate {
     }
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { parent.isError = true }
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { parent.isError = true }
+
+    // 외부 URL Scheme 처리 (iosamap://, tel:, mailto: 등)
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        guard let url = navigationAction.request.url else {
+            decisionHandler(.allow)
+            return
+        }
+
+        let scheme = url.scheme ?? ""
+
+        // 외부 앱 URL Scheme
+        if ["iosamap", "baidumap", "comgooglemaps", "tel", "mailto", "sms"].contains(scheme) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            decisionHandler(.cancel)
+            return
+        }
+
+        // 외부 웹사이트 (Safari에서 열기)
+        if navigationAction.navigationType == .linkActivated,
+           let host = url.host,
+           !host.contains("revuplan.com") && !host.contains("localhost") {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            decisionHandler(.cancel)
+            return
+        }
+
+        decisionHandler(.allow)
+    }
 }
 
 extension WebViewCoordinator: WKScriptMessageHandler {
