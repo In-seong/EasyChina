@@ -1,42 +1,49 @@
 const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent)
 const isAndroid = () => /Android/i.test(navigator.userAgent)
 const isMobile = () => isIOS() || isAndroid()
+const isInApp = () => !!(window.webkit?.messageHandlers?.iOSBridge || (window as any).AndroidBridge)
 
 /**
  * 외부 URL 열기 (웹뷰 호환)
- * window.open은 웹뷰에서 차단되므로 <a> 태그 클릭으로 처리
+ * 앱 내부면 JS Bridge로 네이티브에서 열기
+ * 브라우저면 일반 방식
  */
-function openUrl(url: string) {
-  const a = document.createElement('a')
-  a.href = url
-  a.target = '_blank'
-  a.rel = 'noopener noreferrer'
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
+function openExternalUrl(url: string) {
+  if (window.webkit?.messageHandlers?.iOSBridge) {
+    // iOS: Bridge로 네이티브에서 Safari/앱 열기 (딕셔너리로 전달)
+    window.webkit.messageHandlers.iOSBridge.postMessage({ action: 'openExternalUrl', url })
+  } else if ((window as any).AndroidBridge) {
+    // Android: Bridge (JSON 문자열로 전달)
+    (window as any).AndroidBridge.postMessage(
+      JSON.stringify({ action: 'openExternalUrl', data: { url } })
+    )
+  } else {
+    // 브라우저: 새 탭
+    window.open(url, '_blank')
+  }
 }
 
 /**
- * 앱 URL Scheme 열기 시도 → 실패 시 웹 fallback
+ * 앱 URL Scheme 열기 (iosamap://, diditaxi:// 등)
  */
-function tryOpenApp(appUrl: string, webUrl: string, timeout = 1500) {
-  if (isMobile()) {
-    // 앱 열기 시도
+function openAppScheme(appUrl: string, webFallbackUrl: string) {
+  if (isInApp()) {
+    // 웹뷰: Bridge로 앱 열기 요청
+    openExternalUrl(appUrl)
+    // 앱이 없으면 fallback (2초 후)
+    setTimeout(() => openExternalUrl(webFallbackUrl), 2000)
+  } else if (isMobile()) {
+    // 모바일 브라우저
     window.location.href = appUrl
-
-    // 앱이 안 열리면 웹으로 (앱이 열리면 이 타이머는 실행 안됨)
-    setTimeout(() => {
-      openUrl(webUrl)
-    }, timeout)
+    setTimeout(() => { window.open(webFallbackUrl, '_blank') }, 1500)
   } else {
-    openUrl(webUrl)
+    // PC
+    window.open(webFallbackUrl, '_blank')
   }
 }
 
 /**
  * AMap 길찾기
- * 출발지가 있으면 웹 URL로 열기 (앱 URL Scheme은 출발지 지정 불가)
- * 출발지가 없으면 앱 시도 → 웹 fallback
  */
 export function startAMapNavigation(
   dstLat: number, dstLng: number, dstName: string,
@@ -49,22 +56,22 @@ export function startAMapNavigation(
     webUrl += `&from=${srcLng},${srcLat},${encodeURIComponent(srcName)}`
   }
 
-  // 출발지가 지정된 경우 → 웹 URL만 사용 (앱은 출발지 무시함)
+  // 출발지가 있으면 웹 URL (앱은 출발지 무시)
   if (srcLat && srcLng) {
-    openUrl(webUrl)
+    openExternalUrl(webUrl)
     return
   }
 
-  // 출발지 없음 (현재 위치 → 목적지) → 앱 시도
+  // 출발지 없음 → 앱 시도
   const appUrl = isIOS()
     ? `iosamap://path?sourceApplication=EasyChina&dlat=${dstLat}&dlon=${dstLng}&dname=${dst}&dev=0&t=0`
     : `amapuri://route/plan/?dlat=${dstLat}&dlon=${dstLng}&dname=${dst}&dev=0&t=0`
 
-  tryOpenApp(appUrl, webUrl)
+  openAppScheme(appUrl, webUrl)
 }
 
 /**
- * DiDi(滴滴出行) 택시 호출
+ * DiDi 택시 호출
  */
 export function callDidiTaxi(
   dstLat: number, dstLng: number, dstName: string,
@@ -75,19 +82,16 @@ export function callDidiTaxi(
   let didiAppUrl: string
   if (isIOS()) {
     didiAppUrl = `diditaxi://passenger?action=create_order&dlat=${dstLat}&dlng=${dstLng}&dname=${dst}`
-    if (srcLat && srcLng) {
-      didiAppUrl += `&flat=${srcLat}&flng=${srcLng}&fname=${encodeURIComponent(srcName || '')}`
-    }
   } else {
     didiAppUrl = `didipublic://passenger?action=create_order&dlat=${dstLat}&dlng=${dstLng}&dname=${dst}`
-    if (srcLat && srcLng) {
-      didiAppUrl += `&flat=${srcLat}&flng=${srcLng}&fname=${encodeURIComponent(srcName || '')}`
-    }
+  }
+  if (srcLat && srcLng) {
+    didiAppUrl += `&flat=${srcLat}&flng=${srcLng}&fname=${encodeURIComponent(srcName || '')}`
   }
 
   const didiWebUrl = `https://common.diditaxi.com.cn/general/default/redirect?dlat=${dstLat}&dlng=${dstLng}&dname=${dst}`
 
-  tryOpenApp(didiAppUrl, didiWebUrl)
+  openAppScheme(didiAppUrl, didiWebUrl)
 }
 
 export type NavOption = 'amap' | 'didi' | 'web'

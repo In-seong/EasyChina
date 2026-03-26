@@ -5,6 +5,9 @@ declare global {
         nativeBridge: {
           postMessage: (message: string) => void
         }
+        iOSBridge: {
+          postMessage: (message: any) => void
+        }
       }
     }
     AndroidBridge?: {
