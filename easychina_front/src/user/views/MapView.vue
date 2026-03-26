@@ -464,7 +464,9 @@ onUnmounted(() => {
         <!-- Search Results Dropdown -->
         <div
           v-if="showSearchResults"
-          class="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg max-h-72 overflow-y-auto z-[1100]"
+          @click.stop
+          @touchmove.stop
+          class="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg max-h-72 overflow-y-auto z-[1100] overscroll-contain"
         >
           <div v-if="searching" class="p-4 text-center text-xs text-gray-400">검색 중...</div>
           <div v-else-if="searchResults.length === 0" class="p-4 text-center text-xs text-gray-400">결과 없음</div>
