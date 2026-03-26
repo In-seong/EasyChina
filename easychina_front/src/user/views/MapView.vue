@@ -195,11 +195,13 @@ async function initMap() {
       if (lat && lng && map) {
         map.setCenter([lng, lat])
         map.setZoom(16)
-        if (name) {
-          const el = createMarkerEl('#ef4444', name)
-          new maplibregl.Marker({ element: el, anchor: 'bottom' })
-            .setLngLat([lng, lat])
-            .addTo(map)
+        // DB에 있는 장소면 바텀시트 자동 오픈
+        const matched = places.value.find(p =>
+          Math.abs(Number(p.latitude) - lat) < 0.001 &&
+          Math.abs(Number(p.longitude) - lng) < 0.001
+        )
+        if (matched) {
+          selectedPlace.value = matched
         }
       }
     })
