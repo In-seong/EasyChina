@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../../shared/api'
 import type { Place, ApiResponse } from '../../shared/types/place'
 import { imageUrl } from '../../shared/utils/image'
-import { startAMapNavigation } from '../../shared/utils/navigation'
+import { startAMapNavigation, callDidiTaxi } from '../../shared/utils/navigation'
 import { useAuth } from '../../shared/composables/useAuth'
 import { useBookmark } from '../../shared/composables/useBookmark'
 
@@ -16,8 +16,10 @@ const place = ref<Place | null>(null)
 const showTaxiModal = ref(false)
 const showMiniMap = ref(false)
 const showCourseModal = ref(false)
+const showNavModal = ref(false)
 const copied = ref(false)
 const bookmarking = ref(false)
+const toast = ref('')
 const courses = ref<any[]>([])
 const selectedCourseId = ref<number | null>(null)
 const selectedDayNumber = ref<number>(1)
@@ -91,13 +93,31 @@ function openInMap() {
   router.push(`/map?lat=${place.value.latitude}&lng=${place.value.longitude}&name=${encodeURIComponent(place.value.name_ko)}`)
 }
 
-function startNavigation() {
+function showToast(msg: string) {
+  toast.value = msg
+  setTimeout(() => { toast.value = '' }, 3000)
+}
+
+async function doNavigate(type: 'amap' | 'didi') {
   if (!place.value) return
-  startAMapNavigation(
-    Number(place.value.latitude),
-    Number(place.value.longitude),
-    place.value.name_cn
-  )
+  showNavModal.value = false
+
+  if (type === 'amap') {
+    startAMapNavigation(
+      Number(place.value.latitude),
+      Number(place.value.longitude),
+      place.value.name_cn
+    )
+  } else {
+    const copied = await callDidiTaxi(
+      Number(place.value.latitude),
+      Number(place.value.longitude),
+      place.value.name_cn
+    )
+    if (copied) {
+      showToast(`📋 "${place.value.name_cn}" 복사됨! DiDi에서 붙여넣기 하세요`)
+    }
+  }
 }
 
 onMounted(() => {
@@ -243,13 +263,59 @@ onMounted(() => {
           🗺 지도에서 보기
         </button>
         <button
-          @click="startNavigation"
+          @click="showNavModal = true"
           class="flex-1 py-3 rounded-xl text-sm font-medium bg-green-500 text-white active:bg-green-600"
         >
           📍 길찾기
         </button>
       </div>
     </div>
+
+    <!-- Toast -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="toast" class="fixed top-16 left-4 right-4 z-[100] flex justify-center pointer-events-none">
+          <div class="bg-gray-900 text-white text-sm px-5 py-3 rounded-xl shadow-lg max-w-sm text-center">
+            {{ toast }}
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Navigation Modal -->
+    <Teleport to="body">
+      <div v-if="showNavModal" class="fixed inset-0 z-50 bg-black/30 flex items-end justify-center">
+        <div class="bg-white rounded-t-2xl w-full max-w-lg p-5" @click.stop>
+          <h3 class="text-base font-bold mb-1">길찾기 방법 선택</h3>
+          <p class="text-xs text-gray-400 mb-3">현재 위치 → {{ place?.name_ko }}</p>
+
+          <div class="space-y-2">
+            <button
+              @click="doNavigate('amap')"
+              class="w-full flex items-center gap-3 bg-gray-50 rounded-xl p-4 active:bg-gray-100"
+            >
+              <span class="text-2xl">🗺</span>
+              <div class="text-left">
+                <p class="text-sm font-semibold text-gray-800">고덕지도 (AMap)</p>
+                <p class="text-xs text-gray-400">직접 네비게이션으로 안내</p>
+              </div>
+            </button>
+            <button
+              @click="doNavigate('didi')"
+              class="w-full flex items-center gap-3 bg-gray-50 rounded-xl p-4 active:bg-gray-100"
+            >
+              <span class="text-2xl">🚕</span>
+              <div class="text-left">
+                <p class="text-sm font-semibold text-gray-800">DiDi 택시 호출</p>
+                <p class="text-xs text-gray-400">목적지 복사 후 DiDi 앱 열기</p>
+              </div>
+            </button>
+          </div>
+
+          <button @click="showNavModal = false" class="w-full mt-3 py-2 text-sm text-gray-400">닫기</button>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- Course Add Modal -->
     <Teleport to="body">
@@ -360,3 +426,8 @@ onMounted(() => {
     </Teleport>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>
