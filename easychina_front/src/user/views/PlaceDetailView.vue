@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../../shared/api'
 import type { Place, ApiResponse } from '../../shared/types/place'
 import { imageUrl } from '../../shared/utils/image'
+import { startAMapNavigation } from '../../shared/utils/navigation'
 import { useAuth } from '../../shared/composables/useAuth'
 import { useBookmark } from '../../shared/composables/useBookmark'
 
@@ -92,30 +93,11 @@ function openInMap() {
 
 function startNavigation() {
   if (!place.value) return
-  const { latitude, longitude, name_cn } = place.value
-  const name = encodeURIComponent(name_cn)
-
-  // iOS: AMap 앱 URL Scheme 시도
-  const amapAppUrl = `iosamap://path?sourceApplication=EasyChina&dlat=${latitude}&dlon=${longitude}&dname=${name}&dev=0&t=0`
-  // Android: AMap 앱 URL Scheme
-  const amapAndroidUrl = `amapuri://route/plan/?dlat=${latitude}&dlon=${longitude}&dname=${name}&dev=0&t=0`
-  // 웹 fallback
-  const amapWebUrl = `https://uri.amap.com/navigation?to=${longitude},${latitude},${name}&mode=car&src=EasyChina`
-
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
-  const isAndroid = /Android/i.test(navigator.userAgent)
-
-  if (isIOS) {
-    // iOS: 앱 열기 시도 → 실패 시 웹으로
-    window.location.href = amapAppUrl
-    setTimeout(() => { window.open(amapWebUrl, '_blank') }, 1500)
-  } else if (isAndroid) {
-    window.location.href = amapAndroidUrl
-    setTimeout(() => { window.open(amapWebUrl, '_blank') }, 1500)
-  } else {
-    // PC: 웹으로
-    window.open(amapWebUrl, '_blank')
-  }
+  startAMapNavigation(
+    Number(place.value.latitude),
+    Number(place.value.longitude),
+    place.value.name_cn
+  )
 }
 
 onMounted(() => {

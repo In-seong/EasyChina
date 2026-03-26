@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '../../shared/api'
 import type { TravelCourse } from '../../shared/types/place'
 import { imageUrl } from '../../shared/utils/image'
+import { startAMapNavigation } from '../../shared/utils/navigation'
 
 const route = useRoute()
 const router = useRouter()
@@ -70,10 +71,20 @@ function getPlaceImage(item: any): string | null {
   return imageUrl(p.primary_image?.image_url || p.images?.[0]?.image_url)
 }
 
-function navigateToPlace(place: any) {
-  const name = encodeURIComponent(place.name_cn)
-  const amapWebUrl = `https://uri.amap.com/navigation?to=${place.longitude},${place.latitude},${name}&mode=car&src=EasyChina`
-  window.open(amapWebUrl, '_blank')
+function navigateToPlace(place: any, idx: number) {
+  // 이전 장소가 있으면 출발지로 설정
+  let srcLat, srcLng, srcName
+  if (idx > 0 && dayItems.value[idx - 1]?.place) {
+    const prev = dayItems.value[idx - 1].place
+    srcLat = Number(prev.latitude)
+    srcLng = Number(prev.longitude)
+    srcName = prev.name_cn
+  }
+
+  startAMapNavigation(
+    Number(place.latitude), Number(place.longitude), place.name_cn,
+    srcLat, srcLng, srcName
+  )
 }
 
 function showTaxi(place: any) {
@@ -173,9 +184,9 @@ onMounted(fetchCourse)
           <!-- 액션 버튼 -->
           <div class="flex border-t border-gray-50">
             <button
-              @click="navigateToPlace(item.place)"
+              @click="navigateToPlace(item.place, idx)"
               class="flex-1 py-2 text-xs text-blue-500 font-medium active:bg-gray-50"
-            >📍 길찾기</button>
+            >📍 {{ idx > 0 ? dayItems[idx-1].place?.name_ko + '에서' : '길찾기' }}</button>
             <div class="w-px bg-gray-50"></div>
             <button
               @click="showTaxi(item.place)"
