@@ -57,9 +57,9 @@ onMounted(fetchCourses)
     </div>
 
     <div class="px-4 pt-4 space-y-3">
-      <div v-for="course in courses" :key="course.id" class="bg-white rounded-xl p-4 shadow-sm">
+      <div v-for="course in courses" :key="course.id" class="bg-white rounded-xl p-4 shadow-sm active:bg-gray-50">
         <div class="flex justify-between items-start">
-          <div>
+          <div class="flex-1" @click="router.push(`/courses/${course.id}`)">
             <h3 class="font-semibold text-gray-800">{{ course.title }}</h3>
             <p v-if="course.start_date" class="text-xs text-gray-400 mt-1">
               {{ formatDate(course.start_date) }}
@@ -67,7 +67,7 @@ onMounted(fetchCourses)
             </p>
             <p class="text-xs text-gray-400 mt-0.5">장소 {{ (course as any).items_count || 0 }}개</p>
           </div>
-          <button @click="removeCourse(course.id)" class="text-red-400 text-xs">삭제</button>
+          <button @click.stop="removeCourse(course.id)" class="text-red-400 text-xs">삭제</button>
         </div>
       </div>
     </div>

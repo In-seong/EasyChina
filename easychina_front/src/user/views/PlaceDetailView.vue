@@ -14,8 +14,14 @@ const { isBookmarked, toggleBookmark, loadBookmarks } = useBookmark()
 const place = ref<Place | null>(null)
 const showTaxiModal = ref(false)
 const showMiniMap = ref(false)
+const showCourseModal = ref(false)
 const copied = ref(false)
 const bookmarking = ref(false)
+const courses = ref<any[]>([])
+const selectedCourseId = ref<number | null>(null)
+const selectedDayNumber = ref<number>(1)
+const addingToCourse = ref(false)
+const courseTotalDays = ref(3)
 
 async function handleBookmark() {
   if (!place.value) return
@@ -38,6 +44,45 @@ function copyAddress() {
   navigator.clipboard.writeText(place.value.address_cn)
   copied.value = true
   setTimeout(() => copied.value = false, 2000)
+}
+
+async function openCourseModal() {
+  if (!isLoggedIn.value) { router.push('/mypage'); return }
+  try {
+    const { data } = await api.get('/api/user/travel-courses')
+    courses.value = data.data
+    showCourseModal.value = true
+  } catch {}
+}
+
+function selectCourse(course: any) {
+  selectedCourseId.value = course.id
+  selectedDayNumber.value = 1
+  if (course.start_date && course.end_date) {
+    const start = new Date(course.start_date)
+    const end = new Date(course.end_date)
+    courseTotalDays.value = Math.max(Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1, 1)
+  } else {
+    courseTotalDays.value = 3
+  }
+}
+
+async function addToCourse() {
+  if (!selectedCourseId.value || !place.value) return
+  addingToCourse.value = true
+  try {
+    await api.post(`/api/user/travel-courses/${selectedCourseId.value}/items`, {
+      place_id: place.value.id,
+      day_number: selectedDayNumber.value,
+    })
+    showCourseModal.value = false
+    selectedCourseId.value = null
+    alert('코스에 추가되었습니다!')
+  } catch {
+    alert('추가에 실패했습니다.')
+  } finally {
+    addingToCourse.value = false
+  }
 }
 
 function openInMap() {
@@ -202,6 +247,12 @@ onMounted(() => {
       >
         🚕 택시 기사님께 보여주기
       </button>
+      <button
+        @click="openCourseModal"
+        class="w-full py-3 rounded-xl text-sm font-medium bg-purple-500 text-white active:bg-purple-600"
+      >
+        📅 여행 코스에 추가
+      </button>
       <div class="flex gap-2">
         <button
           @click="openInMap"
@@ -217,6 +268,66 @@ onMounted(() => {
         </button>
       </div>
     </div>
+
+    <!-- Course Add Modal -->
+    <Teleport to="body">
+      <div v-if="showCourseModal" class="fixed inset-0 z-50 bg-black/30 flex items-end justify-center">
+        <div class="bg-white rounded-t-2xl w-full max-w-lg p-5" @click.stop>
+          <h3 class="text-lg font-bold mb-3">어떤 코스에 추가할까요?</h3>
+
+          <!-- 코스 목록 -->
+          <div v-if="!selectedCourseId" class="space-y-2 max-h-60 overflow-y-auto">
+            <button
+              v-for="c in courses" :key="c.id"
+              @click="selectCourse(c)"
+              class="w-full text-left bg-gray-50 rounded-xl p-3 active:bg-gray-100"
+            >
+              <p class="text-sm font-semibold text-gray-800">📅 {{ c.title }}</p>
+              <p v-if="c.start_date" class="text-xs text-gray-400">
+                {{ c.start_date?.substring(0,10) }}
+                <span v-if="c.end_date"> ~ {{ c.end_date?.substring(0,10) }}</span>
+              </p>
+            </button>
+            <div v-if="courses.length === 0" class="text-center py-4">
+              <p class="text-sm text-gray-400">생성된 코스가 없습니다</p>
+            </div>
+            <button
+              @click="showCourseModal = false; router.push('/courses')"
+              class="w-full text-center py-3 text-blue-500 text-sm font-medium"
+            >
+              + 새 코스 만들기
+            </button>
+          </div>
+
+          <!-- 일차 선택 -->
+          <div v-else>
+            <p class="text-sm text-gray-600 mb-3">몇 일차에 추가할까요?</p>
+            <div class="flex gap-2 flex-wrap mb-4">
+              <button
+                v-for="d in courseTotalDays" :key="d"
+                @click="selectedDayNumber = d"
+                class="px-4 py-2 rounded-full text-sm font-medium"
+                :class="selectedDayNumber === d ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'"
+              >
+                Day {{ d }}
+              </button>
+            </div>
+            <div class="flex gap-2">
+              <button @click="selectedCourseId = null" class="flex-1 py-3 rounded-lg text-sm bg-gray-100 text-gray-500">뒤로</button>
+              <button
+                @click="addToCourse"
+                :disabled="addingToCourse"
+                class="flex-1 py-3 rounded-lg text-sm bg-blue-500 text-white disabled:opacity-50"
+              >
+                {{ addingToCourse ? '추가 중...' : '추가하기' }}
+              </button>
+            </div>
+          </div>
+
+          <button @click="showCourseModal = false; selectedCourseId = null" class="w-full mt-3 py-2 text-sm text-gray-400">닫기</button>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- Taxi Modal -->
     <Teleport to="body">
