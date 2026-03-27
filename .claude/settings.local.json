@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:www.metrolinehub.com)",
+      "WebFetch(domain:metro.nuua.travel)"
     ]
   }
 }

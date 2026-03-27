@@ -11,6 +11,7 @@ export default defineConfig({
       workbox: {
         // 앱 셸 (HTML/JS/CSS) 캐시
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
         // API 응답 캐시 (네트워크 우선, 실패 시 캐시)
         runtimeCaching: [
           {

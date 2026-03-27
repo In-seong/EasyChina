@@ -61,6 +61,21 @@ onMounted(fetchData)
       </div>
     </div>
 
+    <!-- 지하철 노선도 바로가기 -->
+    <button
+      @click="router.push('/metro')"
+      class="w-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 flex items-center justify-between shadow-sm active:from-blue-600 active:to-blue-700 mb-4"
+    >
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">🚇</span>
+        <div>
+          <span class="text-sm font-bold text-white">상하이 지하철 노선도</span>
+          <p class="text-[10px] text-blue-100 mt-0.5">2026 최신 노선도 · 확대/축소 가능</p>
+        </div>
+      </div>
+      <span class="text-white text-sm">›</span>
+    </button>
+
     <!-- Tip Categories -->
     <div class="space-y-2">
       <button

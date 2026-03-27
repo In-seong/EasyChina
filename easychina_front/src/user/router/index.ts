@@ -58,6 +58,11 @@ const router = createRouter({
       component: () => import('../views/CourseDetailView.vue'),
     },
     {
+      path: '/metro',
+      name: 'metro',
+      component: () => import('../views/MetroMapView.vue'),
+    },
+    {
       path: '/offline',
       name: 'offline',
       component: () => import('../views/OfflineView.vue'),
