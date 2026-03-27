@@ -15,6 +15,7 @@ const showRegister = ref(false)
 const menuItems = [
   { icon: '🔖', label: '북마크한 장소', route: '/bookmarks', auth: true },
   { icon: '🗺', label: '나의 여행 코스', route: '/courses', auth: true },
+  { icon: '📥', label: '오프라인 데이터', route: '/offline', auth: false },
 ]
 
 async function doRegister() {

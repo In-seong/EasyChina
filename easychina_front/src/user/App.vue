@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import TabBar from './components/TabBar.vue'
 import CurrencyConverter from './components/CurrencyConverter.vue'
+import OfflineBanner from './components/OfflineBanner.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -33,6 +34,7 @@ watch(() => route.path, syncTab, { immediate: true })
 
 <template>
   <div class="min-h-screen pb-16">
+    <OfflineBanner />
     <router-view />
     <CurrencyConverter />
     <TabBar :tabs="tabs" :current="currentTab" @change="onTabChange" />

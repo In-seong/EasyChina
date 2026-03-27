@@ -57,6 +57,11 @@ const router = createRouter({
       name: 'course-detail',
       component: () => import('../views/CourseDetailView.vue'),
     },
+    {
+      path: '/offline',
+      name: 'offline',
+      component: () => import('../views/OfflineView.vue'),
+    },
   ],
 })
 
