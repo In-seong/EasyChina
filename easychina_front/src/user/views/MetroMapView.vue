@@ -44,7 +44,7 @@ function resetView() {
 </script>
 
 <template>
-  <div class="h-[calc(100vh-56px)] flex flex-col bg-gray-50">
+  <div class="h-[calc(100vh-56px)] flex flex-col bg-gray-50 relative">
     <!-- Header -->
     <div class="bg-white px-4 py-3 flex items-center justify-between border-b shrink-0 z-10">
       <button @click="router.back()" class="text-gray-600">← 뒤로</button>
