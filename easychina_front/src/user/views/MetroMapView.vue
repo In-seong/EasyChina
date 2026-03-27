@@ -101,13 +101,14 @@ function resetView() { scale.value = 1; translateX.value = 0; translateY.value =
         class="w-full h-full"
         :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
         :style="{
-          transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
+          transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`,
           transformOrigin: 'center center',
           transition: isDragging ? 'none' : 'transform 0.15s ease-out',
+          willChange: 'transform',
         }"
       >
         <img
-          src="/shanghai-metro-map.png"
+          src="/shanghai-metro-map.webp"
           alt="상하이 지하철 노선도"
           class="w-full h-full object-contain"
           draggable="false"
