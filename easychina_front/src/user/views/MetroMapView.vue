@@ -4,12 +4,27 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const container = ref<HTMLDivElement | null>(null)
+const zoomLevel = ref(1)
 
-// 이미지 너비를 %로 조절 (100% = 화면 맞춤, 300% = 3배 확대)
-const imgWidth = ref(100)
+function zoomIn() {
+  zoomLevel.value = Math.min(5, zoomLevel.value + 0.5)
+}
 
+function zoomOut() {
+  zoomLevel.value = Math.max(1, zoomLevel.value - 0.5)
+}
+
+function resetView() {
+  zoomLevel.value = 1
+  if (container.value) {
+    container.value.scrollTop = 0
+    container.value.scrollLeft = 0
+  }
+}
+
+// 핀치 줌
 let initialPinchDistance = 0
-let initialWidth = 100
+let initialZoom = 1
 
 function onTouchStart(e: TouchEvent) {
   if (e.touches.length === 2) {
@@ -17,7 +32,7 @@ function onTouchStart(e: TouchEvent) {
       e.touches[0].clientX - e.touches[1].clientX,
       e.touches[0].clientY - e.touches[1].clientY
     )
-    initialWidth = imgWidth.value
+    initialZoom = zoomLevel.value
   }
 }
 
@@ -28,17 +43,7 @@ function onTouchMove(e: TouchEvent) {
       e.touches[0].clientX - e.touches[1].clientX,
       e.touches[0].clientY - e.touches[1].clientY
     )
-    imgWidth.value = Math.max(100, Math.min(800, initialWidth * (dist / initialPinchDistance)))
-  }
-}
-
-function zoomIn() { imgWidth.value = Math.min(800, imgWidth.value + 50) }
-function zoomOut() { imgWidth.value = Math.max(100, imgWidth.value - 50) }
-function resetView() {
-  imgWidth.value = 100
-  if (container.value) {
-    container.value.scrollTop = 0
-    container.value.scrollLeft = 0
+    zoomLevel.value = Math.max(1, Math.min(5, initialZoom * (dist / initialPinchDistance)))
   }
 }
 </script>
@@ -55,22 +60,27 @@ function resetView() {
     <!-- Scrollable Map -->
     <div
       ref="container"
-      class="flex-1 overflow-auto"
+      class="flex-1 overflow-auto overscroll-contain"
       @touchstart="onTouchStart"
       @touchmove="onTouchMove"
     >
       <img
         src="/shanghai-metro-map.jpg"
         alt="상하이 지하철 노선도"
-        :style="{ width: imgWidth + '%' }"
         draggable="false"
+        :style="{
+          width: (zoomLevel * 100) + 'vw',
+          maxWidth: 'none',
+          display: 'block',
+        }"
       />
     </div>
 
-    <!-- Zoom -->
-    <div class="absolute bottom-20 right-3 flex flex-col gap-2 z-10">
-      <button @click="zoomIn" class="w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-lg font-bold active:bg-gray-100">+</button>
-      <button @click="zoomOut" class="w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-lg font-bold active:bg-gray-100">−</button>
+    <!-- Zoom Controls -->
+    <div class="absolute bottom-20 right-3 flex flex-col gap-2 z-50">
+      <button @click.stop="zoomIn" class="w-12 h-12 bg-white shadow-lg rounded-full flex items-center justify-center text-xl font-bold active:bg-gray-200">+</button>
+      <button @click.stop="zoomOut" class="w-12 h-12 bg-white shadow-lg rounded-full flex items-center justify-center text-xl font-bold active:bg-gray-200">−</button>
+      <span class="text-[10px] text-gray-400 text-center">{{ Math.round(zoomLevel * 100) }}%</span>
     </div>
   </div>
 </template>
