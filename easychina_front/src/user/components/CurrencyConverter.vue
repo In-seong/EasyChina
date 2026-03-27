@@ -133,7 +133,7 @@ onMounted(() => {
   <button
     v-if="!isOpen"
     @click="openConverter"
-    class="fixed left-4 z-40 w-12 h-12 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center text-xl active:scale-95 transition-transform"
+    class="fixed left-4 z-[8] w-12 h-12 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center text-xl active:scale-95 transition-transform"
     style="bottom: calc(4rem + var(--safe-area-bottom, 0px))"
     aria-label="환율 계산기 열기"
   >

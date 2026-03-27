@@ -532,10 +532,6 @@ onUnmounted(() => {
       <span class="text-lg">{{ isTracking ? '📍' : '🎯' }}</span>
     </button>
 
-    <!-- Place count -->
-    <div class="absolute bottom-4 left-3 z-[10]">
-      <span class="bg-white/90 shadow rounded-full px-3 py-1.5 text-xs text-gray-500">📍 {{ places.length }}개 장소</span>
-    </div>
 
     <!-- POI Tap Popup (역, 건물 등) -->
     <div
