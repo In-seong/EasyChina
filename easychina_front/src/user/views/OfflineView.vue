@@ -19,8 +19,8 @@ interface CityOption {
 }
 
 const cities: CityOption[] = [
-  { id: 1, nameKo: '상하이', nameCn: '上海', available: true },
-  { id: 2, nameKo: '베이징', nameCn: '北京', available: false },
+  { id: 2, nameKo: '상하이', nameCn: '上海', available: true },
+  { id: 1, nameKo: '베이징', nameCn: '北京', available: false },
   { id: 3, nameKo: '광저우', nameCn: '广州', available: false },
   { id: 4, nameKo: '청두', nameCn: '成都', available: false },
 ]
