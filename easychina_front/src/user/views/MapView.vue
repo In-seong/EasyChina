@@ -6,6 +6,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import api from '../../shared/api'
 import type { Place, City, Category, ApiResponse, PaginatedResponse } from '../../shared/types/place'
 import { imageUrl } from '../../shared/utils/image'
+import { startAMapNavigation } from '../../shared/utils/navigation'
 
 const router = useRouter()
 const route = useRoute()
@@ -21,6 +22,9 @@ const selectedCategory = ref<number | null>(null)
 const searchQuery = ref('')
 const selectedPlace = ref<Place | null>(null)
 const loading = ref(false)
+
+// 지도 POI 클릭 정보
+const tappedPoi = ref<{ name: string; nameCn: string; lat: number; lng: number; type: string } | null>(null)
 const searchResults = ref<SearchResult[]>([])
 const showSearchResults = ref(false)
 const searching = ref(false)
@@ -187,6 +191,59 @@ async function initMap() {
 
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right')
 
+  // 지도 POI 클릭 (역, 건물, 시설 등)
+  map.on('click', (e) => {
+    if (!map) return
+    // 커스텀 마커 클릭이면 무시 (이미 처리됨)
+    const target = e.originalEvent.target as HTMLElement
+    if (target.closest('.maplibregl-marker')) return
+
+    // 벡터 타일 피처 조회
+    const features = map.queryRenderedFeatures(e.point)
+    if (!features.length) {
+      tappedPoi.value = null
+      return
+    }
+
+    // 이름이 있는 피처 찾기
+    const poi = features.find(f => f.properties?.name || f.properties?.['name:ko'] || f.properties?.['name:zh'])
+    if (poi && poi.properties) {
+      const props = poi.properties
+      const nameKo = props['name:ko'] || ''
+      const nameCn = props['name:zh'] || props.name || ''
+      const displayName = nameKo || nameCn || props.name || ''
+
+      if (!displayName) { tappedPoi.value = null; return }
+
+      // 피처 타입 판별
+      let type = '장소'
+      const cls = props.class || props.subclass || ''
+      if (cls.includes('rail') || cls.includes('subway') || cls.includes('station')) type = '🚇 역'
+      else if (cls.includes('hospital') || cls.includes('clinic')) type = '🏥 병원'
+      else if (cls.includes('school') || cls.includes('university')) type = '🏫 학교'
+      else if (cls.includes('shop') || cls.includes('mall')) type = '🛒 쇼핑'
+      else if (cls.includes('restaurant') || cls.includes('cafe') || cls.includes('food')) type = '🍽 음식'
+      else if (cls.includes('hotel') || cls.includes('lodging')) type = '🏨 호텔'
+      else if (cls.includes('park') || cls.includes('garden')) type = '🌳 공원'
+      else if (cls.includes('museum') || cls.includes('gallery')) type = '🏛 문화'
+      else if (cls.includes('bank') || cls.includes('atm')) type = '🏦 은행'
+      else if (cls.includes('pharmacy')) type = '💊 약국'
+      else if (cls.includes('airport')) type = '✈️ 공항'
+      else if (cls.includes('bus')) type = '🚌 버스'
+
+      tappedPoi.value = {
+        name: displayName,
+        nameCn: nameCn,
+        lat: e.lngLat.lat,
+        lng: e.lngLat.lng,
+        type,
+      }
+      selectedPlace.value = null // 기존 바텀시트 닫기
+    } else {
+      tappedPoi.value = null
+    }
+  })
+
   map.on('load', () => {
     fetchFilters().then(fetchPlaces).then(() => {
       const lat = route.query.lat ? Number(route.query.lat) : null
@@ -327,6 +384,31 @@ function onCityChange() {
 function goToDetail(placeId: number) { router.push(`/places/${placeId}`) }
 function closeBottomSheet() { selectedPlace.value = null }
 
+// POI 팝업 함수
+function copyPoiName() {
+  if (!tappedPoi.value) return
+  navigator.clipboard.writeText(tappedPoi.value.nameCn || tappedPoi.value.name)
+}
+
+function navigateToPoi() {
+  if (!tappedPoi.value) return
+  startAMapNavigation(tappedPoi.value.lat, tappedPoi.value.lng, tappedPoi.value.nameCn || tappedPoi.value.name)
+  tappedPoi.value = null
+}
+
+function searchPoiNearby() {
+  if (!tappedPoi.value || !map) return
+  map.setCenter([tappedPoi.value.lng, tappedPoi.value.lat])
+  map.setZoom(16)
+  tappedPoi.value = null
+}
+
+let poiTouchStartY = 0
+function onPoiTouchStart(e: TouchEvent) { poiTouchStartY = e.touches[0].clientY }
+function onPoiTouchEnd(e: TouchEvent) {
+  if (e.changedTouches[0].clientY - poiTouchStartY > 60) tappedPoi.value = null
+}
+
 // 바텀시트 스와이프 닫기
 let sheetTouchStartY = 0
 function onSheetTouchStart(e: TouchEvent) { sheetTouchStartY = e.touches[0].clientY }
@@ -454,6 +536,42 @@ onUnmounted(() => {
     <div class="absolute bottom-4 left-3 z-[10]">
       <span class="bg-white/90 shadow rounded-full px-3 py-1.5 text-xs text-gray-500">📍 {{ places.length }}개 장소</span>
     </div>
+
+    <!-- POI Tap Popup (역, 건물 등) -->
+    <div
+      v-if="tappedPoi && !selectedPlace"
+      class="absolute bottom-0 left-0 right-0 z-[10] bg-white rounded-t-2xl shadow-2xl p-4"
+      @touchstart="onPoiTouchStart"
+      @touchend="onPoiTouchEnd"
+    >
+      <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3"></div>
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-sm">{{ tappedPoi.type }}</span>
+        <h3 class="font-bold text-gray-900">{{ tappedPoi.name }}</h3>
+      </div>
+      <p v-if="tappedPoi.nameCn && tappedPoi.nameCn !== tappedPoi.name" class="text-xs text-gray-400 mb-3">{{ tappedPoi.nameCn }}</p>
+      <div class="flex gap-2">
+        <button
+          @click="copyPoiName"
+          class="flex-1 py-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 active:bg-gray-200"
+        >📋 이름 복사</button>
+        <button
+          @click="navigateToPoi"
+          class="flex-1 py-2 rounded-lg text-xs font-medium bg-blue-500 text-white active:bg-blue-600"
+        >📍 길찾기</button>
+        <button
+          @click="searchPoiNearby"
+          class="flex-1 py-2 rounded-lg text-xs font-medium bg-green-500 text-white active:bg-green-600"
+        >🔍 주변 검색</button>
+      </div>
+    </div>
+
+    <!-- POI Backdrop -->
+    <div
+      v-if="tappedPoi && !selectedPlace"
+      class="absolute inset-0 z-[9]"
+      @click="tappedPoi = null"
+    ></div>
 
     <!-- Bottom Sheet Backdrop (빈 영역 터치로 닫기) -->
     <div
