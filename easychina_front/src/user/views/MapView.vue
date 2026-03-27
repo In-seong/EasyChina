@@ -534,6 +534,7 @@ onUnmounted(() => {
 
 
     <!-- POI Tap Popup (역, 건물 등) -->
+    <Transition name="sheet">
     <div
       v-if="tappedPoi && !selectedPlace"
       class="absolute bottom-0 left-0 right-0 z-[10] bg-white rounded-t-2xl shadow-2xl p-4"
@@ -561,6 +562,7 @@ onUnmounted(() => {
         >🔍 주변 검색</button>
       </div>
     </div>
+    </Transition>
 
     <!-- POI Backdrop -->
     <div
@@ -577,6 +579,7 @@ onUnmounted(() => {
     ></div>
 
     <!-- Bottom Sheet -->
+    <Transition name="sheet">
     <div
       v-if="selectedPlace"
       class="absolute bottom-0 left-0 right-0 z-[10] bg-white rounded-t-2xl shadow-2xl p-4"
@@ -609,5 +612,15 @@ onUnmounted(() => {
         <button @click="goToDetail(selectedPlace!.id)" class="flex-1 py-2 rounded-lg text-xs font-medium bg-blue-500 text-white active:bg-blue-600">상세 보기 →</button>
       </div>
     </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.sheet-enter-active, .sheet-leave-active {
+  transition: transform 0.25s ease-out;
+}
+.sheet-enter-from, .sheet-leave-to {
+  transform: translateY(100%);
+}
+</style>
