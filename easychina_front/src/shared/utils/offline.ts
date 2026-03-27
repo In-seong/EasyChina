@@ -193,6 +193,11 @@ export async function downloadCityData(
     onProgress?.({ stage, percent })
 
   try {
+    // ---- 0. Clear existing data ----
+    for (const store of Object.values(STORES)) {
+      await dbClearStore(store)
+    }
+
     // ---- 1. Places (paginated, fetch all) ----
     report('장소 데이터 다운로드 중...', 5)
     const allPlaces: Place[] = []
@@ -221,14 +226,14 @@ export async function downloadCityData(
     const allTips: Tip[] = []
     for (const cat of tipCategories) {
       try {
-        const { data: tipRes } = await api.get<ApiResponse<Tip[]>>(
+        const { data: tipRes } = await api.get<ApiResponse<{ category: TipCategory; tips: Tip[] }>>(
           `/api/user/tip-categories/${cat.id}`,
         )
-        if (Array.isArray(tipRes.data)) {
-          allTips.push(...tipRes.data)
+        if (tipRes.data?.tips && Array.isArray(tipRes.data.tips)) {
+          allTips.push(...tipRes.data.tips)
         }
       } catch {
-        // some categories may not have a detail endpoint; skip
+        // skip
       }
     }
     await dbPutAll(STORES.tips, allTips)
