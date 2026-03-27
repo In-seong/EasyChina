@@ -90,18 +90,22 @@ function zoomOut() {
 }
 
 function resetView() {
-  scale.value = 0.3
-  translateX.value = 0
-  translateY.value = 0
+  if (container.value) {
+    const cw = container.value.clientWidth
+    const imgW = 5348
+    scale.value = cw / imgW
+    translateX.value = 0
+    translateY.value = 0
+  }
 }
 
 onMounted(() => {
-  // 초기 위치: 중앙
-  if (container.value) {
-    const w = container.value.clientWidth
-    translateX.value = w / 2 - 800
-    translateY.value = -200
+  // 이미지 로드 후 화면 너비에 맞게 스케일
+  const image = new Image()
+  image.onload = () => {
+    resetView()
   }
+  image.src = '/shanghai-metro-map.png'
 })
 </script>
 
