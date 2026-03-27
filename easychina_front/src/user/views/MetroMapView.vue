@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -89,23 +89,27 @@ function zoomOut() {
   scale.value = Math.max(0.15, scale.value - 0.15)
 }
 
+const IMG_W = 5348
+const IMG_H = 7213
+const ready = ref(false)
+
 function resetView() {
-  if (container.value) {
-    const cw = container.value.clientWidth
-    const imgW = 5348
-    scale.value = cw / imgW
-    translateX.value = 0
-    translateY.value = 0
-  }
+  if (!container.value) return
+  const cw = container.value.clientWidth
+  const ch = container.value.clientHeight
+  // 화면 너비에 맞추기
+  scale.value = cw / IMG_W
+  translateX.value = 0
+  translateY.value = 0
 }
 
-onMounted(() => {
-  // 이미지 로드 후 화면 너비에 맞게 스케일
-  const image = new Image()
-  image.onload = () => {
+onMounted(async () => {
+  await nextTick()
+  // 약간 지연 후 컨테이너 크기 확보
+  setTimeout(() => {
     resetView()
-  }
-  image.src = '/shanghai-metro-map.png'
+    ready.value = true
+  }, 100)
 })
 </script>
 
@@ -131,12 +135,20 @@ onMounted(() => {
       @mouseleave="onMouseUp"
       @wheel="onWheel"
     >
+      <!-- Loading -->
+      <div v-if="!ready" class="absolute inset-0 flex items-center justify-center">
+        <div class="text-center">
+          <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+          <p class="text-xs text-gray-400">노선도 로딩 중...</p>
+        </div>
+      </div>
+
       <img
         ref="img"
         src="/shanghai-metro-map.png"
         alt="상하이 지하철 노선도"
         class="absolute origin-top-left"
-        :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
+        :class="[isDragging ? 'cursor-grabbing' : 'cursor-grab', ready ? 'opacity-100' : 'opacity-0']"
         :style="{
           transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
           transition: isDragging ? 'none' : 'transform 0.1s ease-out',
