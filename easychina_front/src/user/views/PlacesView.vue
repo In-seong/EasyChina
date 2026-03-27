@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import api from '../../shared/api'
 import type { Place, City, Category, ApiResponse, PaginatedResponse } from '../../shared/types/place'
 import PlaceCard from '../components/PlaceCard.vue'
+import { isOffline, getCachedPlaces } from '../../shared/utils/offline'
 
 const cities = ref<City[]>([])
 const categories = ref<Category[]>([])
@@ -14,20 +15,30 @@ const currentPage = ref(1)
 const lastPage = ref(1)
 const totalCount = ref(0)
 const searchQuery = ref('')
+const offlineMode = ref(false)
 
 async function fetchFilters() {
-  const [cityRes, catRes] = await Promise.all([
-    api.get<ApiResponse<City[]>>('/api/user/cities'),
-    api.get<ApiResponse<Category[]>>('/api/user/categories'),
-  ])
-  cities.value = cityRes.data.data
-  categories.value = catRes.data.data
+  try {
+    const [cityRes, catRes] = await Promise.all([
+      api.get<ApiResponse<City[]>>('/api/user/cities'),
+      api.get<ApiResponse<Category[]>>('/api/user/categories'),
+    ])
+    cities.value = cityRes.data.data
+    categories.value = catRes.data.data
+  } catch {
+    // 오프라인: 기본 도시/카테고리
+    offlineMode.value = true
+  }
 }
 
 async function fetchPlaces(page = 1) {
   if (loading.value) return
   loading.value = true
   try {
+    if (isOffline() || offlineMode.value) {
+      await fetchPlacesOffline()
+      return
+    }
     const { data } = await api.get<ApiResponse<PaginatedResponse<Place>>>('/api/user/places', {
       params: {
         city_id: selectedCity.value,
@@ -41,6 +52,47 @@ async function fetchPlaces(page = 1) {
     currentPage.value = result.current_page
     lastPage.value = result.last_page
     totalCount.value = result.total
+  } catch {
+    // API 실패 시 오프라인 폴백
+    offlineMode.value = true
+    await fetchPlacesOffline()
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fetchPlacesOffline() {
+  try {
+    // 모든 도시 캐시 합치기 (city_id 2=상하이 등)
+    let cached: Place[] = []
+    for (const cityId of [1,2,3,4,5,6,7,8]) {
+      const cityPlaces = await getCachedPlaces(cityId)
+      cached.push(...cityPlaces)
+    }
+
+    // 필터 적용
+    if (selectedCity.value) {
+      cached = cached.filter(p => p.city_id === selectedCity.value)
+    }
+    if (selectedCategory.value) {
+      cached = cached.filter(p => p.category_id === selectedCategory.value)
+    }
+    if (searchQuery.value) {
+      const q = searchQuery.value.toLowerCase()
+      cached = cached.filter(p =>
+        p.name_ko.toLowerCase().includes(q) ||
+        p.name_cn.toLowerCase().includes(q)
+      )
+    }
+
+    // 클라이언트 페이징
+    const perPage = 6
+    const start = (currentPage.value - 1) * perPage
+    totalCount.value = cached.length
+    lastPage.value = Math.max(1, Math.ceil(cached.length / perPage))
+    places.value = cached.slice(start, start + perPage)
+  } catch {
+    places.value = []
   } finally {
     loading.value = false
   }

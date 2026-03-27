@@ -3,18 +3,25 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../shared/api'
 import type { TipCategory, Banner, ApiResponse } from '../../shared/types/place'
+import { isOffline, getCachedTipCategories, getCachedBanners } from '../../shared/utils/offline'
 
 const router = useRouter()
 const tipCategories = ref<TipCategory[]>([])
 const banners = ref<Banner[]>([])
 
 async function fetchData() {
-  const [catRes, bannerRes] = await Promise.all([
-    api.get<ApiResponse<TipCategory[]>>('/api/user/tip-categories'),
-    api.get<ApiResponse<Banner[]>>('/api/user/banners'),
-  ])
-  tipCategories.value = catRes.data.data
-  banners.value = bannerRes.data.data
+  try {
+    const [catRes, bannerRes] = await Promise.all([
+      api.get<ApiResponse<TipCategory[]>>('/api/user/tip-categories'),
+      api.get<ApiResponse<Banner[]>>('/api/user/banners'),
+    ])
+    tipCategories.value = catRes.data.data
+    banners.value = bannerRes.data.data
+  } catch {
+    // 오프라인 폴백
+    tipCategories.value = await getCachedTipCategories()
+    banners.value = await getCachedBanners()
+  }
 }
 
 function bannerTypeStyle(type: string) {

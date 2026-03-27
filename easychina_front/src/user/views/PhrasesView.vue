@@ -47,26 +47,41 @@ function isFavorite(phraseId: number): boolean {
 }
 
 async function fetchCategories() {
-  const { data } = await api.get<ApiResponse<PhraseCategory[]>>('/api/user/phrase-categories')
-  categories.value = data.data
+  try {
+    const { data } = await api.get<ApiResponse<PhraseCategory[]>>('/api/user/phrase-categories')
+    categories.value = data.data
+  } catch {
+    // 오프라인 폴백
+    const { getCachedPhraseCategories } = await import('../../shared/utils/offline')
+    categories.value = await getCachedPhraseCategories()
+  }
   if (categories.value.length > 0) {
     selectedCategory.value = 'favorites'
-    // Load all phrases for search and favorites
     await fetchAllPhrases()
   }
 }
 
 async function fetchAllPhrases() {
-  const promises = categories.value.map(async (cat) => {
-    if (!loadedCategories.value.has(cat.id)) {
-      const { data } = await api.get<ApiResponse<Phrase[]>>('/api/user/phrases', {
-        params: { phrase_category_id: cat.id },
-      })
-      phrasesByCategory.value.set(cat.id, data.data)
+  try {
+    const promises = categories.value.map(async (cat) => {
+      if (!loadedCategories.value.has(cat.id)) {
+        const { data } = await api.get<ApiResponse<Phrase[]>>('/api/user/phrases', {
+          params: { phrase_category_id: cat.id },
+        })
+        phrasesByCategory.value.set(cat.id, data.data)
+        loadedCategories.value.add(cat.id)
+      }
+    })
+    await Promise.all(promises)
+  } catch {
+    // 오프라인 폴백
+    const { getCachedPhrases } = await import('../../shared/utils/offline')
+    const cached = await getCachedPhrases()
+    for (const cat of categories.value) {
+      phrasesByCategory.value.set(cat.id, cached.filter(p => p.phrase_category_id === cat.id))
       loadedCategories.value.add(cat.id)
     }
-  })
-  await Promise.all(promises)
+  }
   // Flatten all phrases
   const all: Phrase[] = []
   phrasesByCategory.value.forEach((phrases) => {

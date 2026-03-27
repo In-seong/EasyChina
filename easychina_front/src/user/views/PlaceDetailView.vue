@@ -38,8 +38,19 @@ async function handleBookmark() {
 }
 
 async function fetchPlace() {
-  const { data } = await api.get<ApiResponse<Place>>(`/api/user/places/${route.params.id}`)
-  place.value = data.data
+  try {
+    const { data } = await api.get<ApiResponse<Place>>(`/api/user/places/${route.params.id}`)
+    place.value = data.data
+  } catch {
+    // 오프라인 폴백: IndexedDB에서 찾기
+    const { getCachedPlaces } = await import('../../shared/utils/offline')
+    const placeId = Number(route.params.id)
+    for (const cityId of [1,2,3,4,5,6,7,8]) {
+      const cached = await getCachedPlaces(cityId)
+      const found = cached.find(p => p.id === placeId)
+      if (found) { place.value = found; break }
+    }
+  }
 }
 
 function copyAddress() {

@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '../../shared/api'
 import type { Tip, TipCategory, ApiResponse } from '../../shared/types/place'
+import { getCachedTips, getCachedTipCategories } from '../../shared/utils/offline'
 
 const route = useRoute()
 const router = useRouter()
@@ -10,11 +11,20 @@ const tips = ref<Tip[]>([])
 const category = ref<TipCategory | null>(null)
 
 async function fetchTips() {
-  const { data } = await api.get<ApiResponse<{ category: TipCategory; tips: Tip[] }>>(
-    `/api/user/tip-categories/${route.params.id}`
-  )
-  category.value = data.data.category
-  tips.value = data.data.tips
+  try {
+    const { data } = await api.get<ApiResponse<{ category: TipCategory; tips: Tip[] }>>(
+      `/api/user/tip-categories/${route.params.id}`
+    )
+    category.value = data.data.category
+    tips.value = data.data.tips
+  } catch {
+    // 오프라인 폴백
+    const catId = Number(route.params.id)
+    const allCats = await getCachedTipCategories()
+    category.value = allCats.find(c => c.id === catId) || null
+    const allTips = await getCachedTips()
+    tips.value = allTips.filter(t => t.tip_category_id === catId)
+  }
 }
 
 onMounted(fetchTips)
