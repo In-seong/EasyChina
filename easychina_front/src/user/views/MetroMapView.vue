@@ -97,7 +97,7 @@ function resetView() { scale.value = 1; translateX.value = 0; translateY.value =
         }"
       >
         <img
-          src="/shanghai-metro-map.png"
+          src="/shanghai-metro-map.webp"
           alt="상하이 지하철 노선도"
           class="w-full h-full object-contain"
           draggable="false"
