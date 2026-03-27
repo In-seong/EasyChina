@@ -28,11 +28,15 @@ struct WebViewContainer: UIViewRepresentable {
         wv.isOpaque = true
         wv.backgroundColor = .white
 
+        // 오프라인 시 캐시 사용
+        config.websiteDataStore = .default()
+
         context.coordinator.webView = wv
         DispatchQueue.main.async { self.webView = wv }
 
         if let myURL = url {
             var request = URLRequest(url: myURL)
+            request.cachePolicy = .returnCacheDataElseLoad  // 캐시 우선, 없으면 네트워크
             if let cookies = HTTPCookieStorage.shared.cookies(for: myURL) {
                 request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: cookies)
             }
@@ -67,8 +71,30 @@ extension WebViewCoordinator: WKNavigationDelegate {
         defaultJS(webView)
         parent.onLoadComplete?()
     }
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { parent.isError = true }
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { parent.isError = true }
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        handleLoadError(webView: webView, error: error)
+    }
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        handleLoadError(webView: webView, error: error)
+    }
+
+    private var retried = false
+    private func handleLoadError(webView: WKWebView, error: Error) {
+        let nsError = error as NSError
+        // 네트워크 오류이고 아직 재시도 안 했으면 → 캐시 전용으로 재시도
+        if !retried && (nsError.code == NSURLErrorNotConnectedToInternet ||
+                        nsError.code == NSURLErrorTimedOut ||
+                        nsError.code == NSURLErrorNetworkConnectionLost) {
+            retried = true
+            if let url = parent.url {
+                var request = URLRequest(url: url)
+                request.cachePolicy = .returnCacheDataDontLoad  // 캐시만 사용
+                webView.load(request)
+                return
+            }
+        }
+        parent.isError = true
+    }
 
     // 외부 URL Scheme 처리 (iosamap://, tel:, mailto: 등)
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
